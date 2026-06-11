@@ -1,0 +1,77 @@
+package com.kondra.vm;
+
+import java.io.File;
+
+import com.kondra.vm.common.CPU;
+import com.kondra.vm.common.VirtualMachine;
+import com.kondra.vm.common.concurrent.ProcessCreationException;
+import com.kondra.vm.common.concurrent.VmProcess;
+import com.kondra.vm.common.concurrent.VmThread;
+import com.kondra.vm.common.loader.Loader;
+import com.kondra.vm.common.memory.Memory;
+import com.kondra.vm.common.memory.MemoryMgr;
+import com.kondra.vm.common.vmx.VmxException;
+import com.kondra.vm.common.vmx.VmxFile;
+
+public class MyVirtualMachine implements VirtualMachine {
+    private Memory systemMemory;
+
+    @Override
+    public CPU createCPU(VmThread thread) {
+        return null;
+    }
+
+    @Override
+    public void setSystemMemory(Memory memory) {
+        this.systemMemory = memory;
+    }
+
+    @Override
+    public Memory getSystemMemory() {
+        return systemMemory;
+    }
+
+    @Override
+    public Memory getMemory(int size) {
+        return new MemoryAccess(size);
+    }
+
+    @Override
+    public MemoryMgr getMemoryMgr() {
+        return null;
+    }
+
+    @Override
+    public VmxFile loadVmxFile(File file) throws VmxException {
+        return null;
+    }
+
+    @Override
+    public VmxFile emptyVmxFile() {
+        return null;
+    }
+
+    @Override
+    public Loader getLoader() {
+        return null;
+    }
+
+    @Override
+    public int getClibJumpTable() {
+        return 0;
+    }
+
+    @Override
+    public int getVmRunAddr() {
+        return 0;
+    }
+
+    @Override
+    public VmProcess createProcess(File file, int stackSize) throws ProcessCreationException {
+        return null;
+    }
+
+    @Override
+    public void reset() {
+    }
+}

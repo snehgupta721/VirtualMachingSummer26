@@ -119,10 +119,10 @@ public class MipsCPU implements CPU {
 
     private void iType(int instruction) {
         short opcode = (short) ((instruction >>> 26) & 0x3F);  // Bits 31-26
-        short rs = (short) ((instruction >>> 21) & 0x1F);    // Bits 25-21
+        short rs = (short) ((instruction >>> 21) & 0x1F);    // Bits 25-21.   Aka base
         short rd    = (short) ((instruction >>> 11) & 0x1F); // Bits 15-11
         short rt = (short) ((instruction >>> 16) & 0x1F);    // Bits 20-16
-        short immediate = (short) (instruction & 0x0000FFFF);  // Bits 15-0
+        short immediate = (short) (instruction & 0x0000FFFF);  // Bits 15-0.  Aka offset
         switch (opcode) {
             case 0x08:
                 // addi
@@ -165,6 +165,50 @@ public class MipsCPU implements CPU {
                 } else {
                     registers[rt] = 0;
                 }
+                break;
+            case 0x20:
+                // lb
+                int address = registers[rs] + immediate;
+                byte result = systemMemory.getByte(address);
+                registers[rt] = result;
+                break;
+            case 0x21:
+                // lh
+                int addr = registers[rs] + immediate;
+                short res = systemMemory.getShort(addr);
+                registers[rt] = res;
+                break;
+            case 0x23:
+                // lw
+                int add = registers[rs] + immediate;
+                int r = systemMemory.getInt(add);
+                registers[rt] = r;
+                break;
+            case 0x24:
+                // lbu
+                int a = registers[rs] + immediate;
+                byte b = systemMemory.getByte(a);
+                registers[rt] = ((int) b) & 0xff;
+                break;
+            case 0x25:
+                // lhu
+                int x = registers[rs] + immediate;
+                short y = systemMemory.getShort(x);
+                registers[rt] = ((int) y) & 0xffff;
+                break;
+            case 0x28:
+                // sb
+                int addres = registers[rs] + immediate;
+                systemMemory.setByte(addres, (byte) (registers[rt] & 0xff));
+                break;
+            case 0x29:
+                // sh
+                int offset = registers[rs] + immediate;
+                systemMemory.setShort(offset, (short) (registers[rt] & 0xffff));
+                break;
+            case 0x2b:
+                // sw
+                systemMemory.setInt(registers[rs] + immediate, registers[rt]);
                 break;
         }
     }

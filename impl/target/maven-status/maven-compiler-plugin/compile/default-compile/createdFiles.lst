@@ -1,2 +1,3 @@
 com/kondra/vm/MyVirtualMachine.class
 com/kondra/vm/MemoryAccess.class
+com/kondra/vm/MipsCPU.class

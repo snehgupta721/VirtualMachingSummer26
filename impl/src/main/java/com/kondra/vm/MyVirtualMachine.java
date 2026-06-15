@@ -18,7 +18,8 @@ public class MyVirtualMachine implements VirtualMachine {
 
     @Override
     public CPU createCPU(VmThread thread) {
-        return null;
+        CPU cpu = new MipsCPU(thread, this.getSystemMemory());
+        return cpu;
     }
 
     @Override

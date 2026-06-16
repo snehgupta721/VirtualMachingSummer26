@@ -19,7 +19,7 @@ public class MipsCPU implements CPU {
         this.systemMemory = systemMemory;
         registers = new int[32];
         iPtr = 0;
-        nextPtr = 0;
+        nextPtr = iPtr + 4;
         hi = 0;
         lo = 0;
     }
@@ -40,6 +40,8 @@ public class MipsCPU implements CPU {
             hi = i1;
         } else if (i == CPU.REG_LO) {
             lo = i1;
+        } else if (i == CPU.REG_ZERO) {
+            registers[i] = 0;
         } else {
             registers[i] = i1;
         }
@@ -104,7 +106,7 @@ public class MipsCPU implements CPU {
                 // R type
                 rType(instruction);
                 break;
-            case 0x02:
+            case 0x01:
                 // J type: jump
                 break;
             case 0x03:
@@ -115,6 +117,7 @@ public class MipsCPU implements CPU {
                 iType(instruction);
                 break;
         }
+        registers[CPU.REG_ZERO] = 0;
     }
 
     private void iType(int instruction) {
@@ -210,11 +213,87 @@ public class MipsCPU implements CPU {
                 // sw
                 systemMemory.setInt(registers[rs] + immediate, registers[rt]);
                 break;
+            case 0x22:
+                // lwl
+                int off = registers[rs] + immediate;
+                int temp = systemMemory.getAlignedInt(off);
+                int shift = (off & 0x3) * 8;
+                int mask = ~(0xffffffff << shift);
+                registers[rt] = registers[rt] & mask;
+                registers[rt] |= temp << shift;
+                break;
+            case 0x26:
+                // lwr
+                int off2 = registers[rs] + immediate;
+                int temp2 = systemMemory.getAlignedInt(off2);
+                int alignment = off2 & 0x3;                       // 2
+                int mask2 = 0xffffffff << ((1 +  alignment) * 8);  // 0xffffff00
+                if (alignment == 3) mask2 = 0;
+                registers[rt] = registers[rt] & mask2;
+                registers[rt] |= temp2 >>> ((3 - alignment) * 8);       // 0x000000ff
+                break;
+            case 0x2a:
+                // swl
+                int o = registers[rs] + immediate;
+                int t = systemMemory.getAlignedInt(o);
+                int s = (o & 3) << 3;
+                int m = (int)(0xffffffffl >> s);
+                int combinedValue = (t & ~m) | ((registers[rt] >>> s) & m);
+                systemMemory.setAlignedInt(o, combinedValue);
+                break;
+            case 0x2e:
+                int of = registers[rs] + immediate;
+                int tm = registers[rt];
+                int sh = (3-(of&3))<<3;
+                int msk = 0xffffffff << sh;
+                int mem = systemMemory.getAlignedInt(of);
+                mem &= ~msk;
+                mem |= (tm<<sh);
+                systemMemory.setAlignedInt(of,mem);
+                break;
+            case 8:
+                // jr
+                break;
+            case 9:
+                // jalr
+                break;
+            case 2:
+                // j
+                break;
+            case 3:
+                // jal
+                break;
+            case 4:
+                // beq
+                break;
+            case 5:
+                // bne
+                break;
+            case 6:
+                // blez
+                break;
+            case 7:
+                // bgtz
+                break;
         }
     }
 
     private void jType(int instruction) {
-
+        short rt = (short) ((instruction >>> 16) & 0x1F);    // Bits 20-16
+        switch (rt) {
+            case 0:
+                // bltz
+                break;
+            case 1:
+                // bgez
+                break;
+            case 16:
+                // bltzal
+                break;
+            case 17:
+                // bgezal
+                break;
+        }
     }
 
     private void rType(int instruction) {

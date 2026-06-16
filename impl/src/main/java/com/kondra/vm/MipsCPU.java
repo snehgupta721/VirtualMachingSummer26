@@ -126,6 +126,11 @@ public class MipsCPU implements CPU {
         short rd    = (short) ((instruction >>> 11) & 0x1F); // Bits 15-11
         short rt = (short) ((instruction >>> 16) & 0x1F);    // Bits 20-16
         short immediate = (short) (instruction & 0x0000FFFF);  // Bits 15-0.  Aka offset
+
+        int addr;
+        int temp;
+        int shift;
+        int mask;
         switch (opcode) {
             case 0x08:
                 // addi
@@ -171,43 +176,43 @@ public class MipsCPU implements CPU {
                 break;
             case 0x20:
                 // lb
-                int address = registers[rs] + immediate;
-                byte result = systemMemory.getByte(address);
+                addr = registers[rs] + immediate;
+                byte result = systemMemory.getByte(addr);
                 registers[rt] = result;
                 break;
             case 0x21:
                 // lh
-                int addr = registers[rs] + immediate;
+                addr = registers[rs] + immediate;
                 short res = systemMemory.getShort(addr);
                 registers[rt] = res;
                 break;
             case 0x23:
                 // lw
-                int add = registers[rs] + immediate;
-                int r = systemMemory.getInt(add);
+                addr = registers[rs] + immediate;
+                int r = systemMemory.getInt(addr);
                 registers[rt] = r;
                 break;
             case 0x24:
                 // lbu
-                int a = registers[rs] + immediate;
-                byte b = systemMemory.getByte(a);
+                addr = registers[rs] + immediate;
+                byte b = systemMemory.getByte(addr);
                 registers[rt] = ((int) b) & 0xff;
                 break;
             case 0x25:
                 // lhu
-                int x = registers[rs] + immediate;
-                short y = systemMemory.getShort(x);
+                addr = registers[rs] + immediate;
+                short y = systemMemory.getShort(addr);
                 registers[rt] = ((int) y) & 0xffff;
                 break;
             case 0x28:
                 // sb
-                int addres = registers[rs] + immediate;
-                systemMemory.setByte(addres, (byte) (registers[rt] & 0xff));
+                addr = registers[rs] + immediate;
+                systemMemory.setByte(addr, (byte) (registers[rt] & 0xff));
                 break;
             case 0x29:
                 // sh
-                int offset = registers[rs] + immediate;
-                systemMemory.setShort(offset, (short) (registers[rt] & 0xffff));
+                addr = registers[rs] + immediate;
+                systemMemory.setShort(addr, (short) (registers[rt] & 0xffff));
                 break;
             case 0x2b:
                 // sw
@@ -215,47 +220,41 @@ public class MipsCPU implements CPU {
                 break;
             case 0x22:
                 // lwl
-                int off = registers[rs] + immediate;
-                int temp = systemMemory.getAlignedInt(off);
-                int shift = (off & 0x3) * 8;
-                int mask = ~(0xffffffff << shift);
+                addr = registers[rs] + immediate;
+                temp = systemMemory.getAlignedInt(addr);
+                shift = (addr & 0x3) * 8;
+                mask = ~(0xffffffff << shift);
                 registers[rt] = registers[rt] & mask;
                 registers[rt] |= temp << shift;
                 break;
             case 0x26:
                 // lwr
-                int off2 = registers[rs] + immediate;
-                int temp2 = systemMemory.getAlignedInt(off2);
-                int alignment = off2 & 0x3;                       // 2
-                int mask2 = 0xffffffff << ((1 +  alignment) * 8);  // 0xffffff00
-                if (alignment == 3) mask2 = 0;
-                registers[rt] = registers[rt] & mask2;
-                registers[rt] |= temp2 >>> ((3 - alignment) * 8);       // 0x000000ff
+                addr = registers[rs] + immediate;
+                temp = systemMemory.getAlignedInt(addr);
+                shift = addr & 0x3;                       // 2
+                mask = 0xffffffff << ((1 +  shift) * 8);  // 0xffffff00
+                if (shift == 3) mask = 0;
+                registers[rt] = registers[rt] & mask;
+                registers[rt] |= temp >>> ((3 - shift) * 8);       // 0x000000ff
                 break;
             case 0x2a:
                 // swl
-                int o = registers[rs] + immediate;
-                int t = systemMemory.getAlignedInt(o);
-                int s = (o & 3) << 3;
-                int m = (int)(0xffffffffl >> s);
-                int combinedValue = (t & ~m) | ((registers[rt] >>> s) & m);
-                systemMemory.setAlignedInt(o, combinedValue);
+                addr = registers[rs] + immediate;
+                temp = systemMemory.getAlignedInt(addr);
+                shift = (addr & 3) << 3;
+                mask = (int)(0xffffffffl >> shift);
+                int combinedValue = (temp & ~mask) | ((registers[rt] >>> shift) & mask);
+                systemMemory.setAlignedInt(addr, combinedValue);
                 break;
             case 0x2e:
-                int of = registers[rs] + immediate;
-                int tm = registers[rt];
-                int sh = (3-(of&3))<<3;
-                int msk = 0xffffffff << sh;
-                int mem = systemMemory.getAlignedInt(of);
-                mem &= ~msk;
-                mem |= (tm<<sh);
-                systemMemory.setAlignedInt(of,mem);
-                break;
-            case 8:
-                // jr
-                break;
-            case 9:
-                // jalr
+                addr = registers[rs] + immediate;
+                temp = registers[rt];
+                shift = (3-(addr&3))<<3;
+                mask = 0xffffffff << shift;
+                int mem = systemMemory.getAlignedInt(addr);
+                mem &= ~mask;
+                mem |= (temp<<shift);
+                systemMemory.setAlignedInt(addr,mem);
                 break;
             case 2:
                 // j
@@ -422,6 +421,12 @@ public class MipsCPU implements CPU {
                 } else {
                     registers[rd] = 0;
                 }
+                break;
+            case 8:
+                // jr
+                break;
+            case 9:
+                // jalr
                 break;
         }
     }

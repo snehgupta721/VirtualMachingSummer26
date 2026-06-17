@@ -80,7 +80,6 @@ public class MipsCPU implements CPU {
             iPtr = nextPtr;
             nextPtr += 4;
             decode(instruction);
-
         }
     }
 
@@ -108,9 +107,7 @@ public class MipsCPU implements CPU {
                 break;
             case 0x01:
                 // J type: jump
-                break;
-            case 0x03:
-                // J type: jump and link
+                jType(instruction);
                 break;
             default:
                 // I type
@@ -122,10 +119,12 @@ public class MipsCPU implements CPU {
 
     private void iType(int instruction) {
         short opcode = (short) ((instruction >>> 26) & 0x3F);  // Bits 31-26
-        short rs = (short) ((instruction >>> 21) & 0x1F);    // Bits 25-21.   Aka base
-        short rd    = (short) ((instruction >>> 11) & 0x1F); // Bits 15-11
-        short rt = (short) ((instruction >>> 16) & 0x1F);    // Bits 20-16
+        short rs = (short) ((instruction >>> 21) & 0x1F);      // Bits 25-21.   Aka base
+        short rd    = (short) ((instruction >>> 11) & 0x1F);   // Bits 15-11
+        short rt = (short) ((instruction >>> 16) & 0x1F);      // Bits 20-16
         short immediate = (short) (instruction & 0x0000FFFF);  // Bits 15-0.  Aka offset
+        int target = (int) (instruction & 0x03FFFFFF);         // Bits 25 - 0
+        short offset = (short) (instruction & 0x0000FFFF);  // Bits 15-0.  Aka offset
 
         int addr;
         int temp;
@@ -258,39 +257,86 @@ public class MipsCPU implements CPU {
                 break;
             case 2:
                 // j
+                nextPtr = (target << 2) | ((iPtr + 4) & 0xF0000000);
                 break;
             case 3:
                 // jal
+                registers[31] = nextPtr;
+                nextPtr = (target << 2) | ((iPtr + 4) & 0xFFFFFFF0);
                 break;
             case 4:
                 // beq
+                if (registers[rs] == registers[rt]) {
+                    nextPtr = iPtr + (int) (offset << 2);
+                } else {
+                    nextPtr = iPtr + 4;
+                }
                 break;
             case 5:
                 // bne
+                if (registers[rs] != registers[rt]) {
+                    nextPtr = iPtr + (int) (offset << 2);
+                } else {
+                    nextPtr = iPtr + 4;
+                }
                 break;
             case 6:
                 // blez
+                if (registers[rs] <= 0) {
+                    nextPtr = iPtr + (int) (offset << 2);
+                } else {
+                    nextPtr = iPtr + 4;
+                }
                 break;
             case 7:
                 // bgtz
+                if (registers[rs] > 0) {
+                    nextPtr = iPtr + (int) (offset << 2);
+                } else {
+                    nextPtr = iPtr + 4;
+                }
                 break;
         }
     }
 
     private void jType(int instruction) {
+        short rs = (short) ((instruction >>> 21) & 0x1F);    // Bits 25-21
         short rt = (short) ((instruction >>> 16) & 0x1F);    // Bits 20-16
+        short offset = (short) (instruction & 0x0000FFFF);  // Bits 15-0.  Aka offset
         switch (rt) {
             case 0:
                 // bltz
+                if (registers[rs] < 0) {
+                    nextPtr = iPtr + (int) (offset << 2);
+                } else {
+                    nextPtr = iPtr + 4;
+                }
                 break;
             case 1:
                 // bgez
+                if (registers[rs] >= 0) {
+                    nextPtr = iPtr + (int) (offset << 2);
+                } else {
+                    nextPtr = iPtr + 4;
+                }
                 break;
             case 16:
                 // bltzal
+                registers[31] = nextPtr;
+                if (registers[rs] < 0) {
+                    nextPtr = iPtr + (int) (offset << 2);
+                } else {
+                    nextPtr = iPtr + 4;
+                }
                 break;
             case 17:
                 // bgezal
+                registers[31] = nextPtr;
+                if (registers[rs] >= 0) {
+                    nextPtr = iPtr + (int) (offset << 2);
+                } else {
+                    nextPtr = iPtr + 4;
+                }
                 break;
         }
     }
@@ -424,9 +470,12 @@ public class MipsCPU implements CPU {
                 break;
             case 8:
                 // jr
+                nextPtr = registers[rs];
                 break;
             case 9:
                 // jalr
+                registers[rd] = nextPtr;
+                nextPtr = registers[rs];
                 break;
         }
     }

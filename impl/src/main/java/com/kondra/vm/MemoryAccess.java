@@ -1,9 +1,11 @@
 package com.kondra.vm;
 
 import com.kondra.vm.common.memory.Memory;
+import lombok.Getter;
 
+@Getter
 public class MemoryAccess implements Memory {
-    private byte[] array;
+    private final byte[] array;
 
     public MemoryAccess(int size) {
         array = new byte[size];

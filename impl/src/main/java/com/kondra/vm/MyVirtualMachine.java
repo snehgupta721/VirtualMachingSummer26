@@ -18,7 +18,7 @@ public class MyVirtualMachine implements VirtualMachine {
 
     @Override
     public CPU createCPU(VmThread thread) {
-        CPU cpu = new MipsCPU(thread, this.getSystemMemory());
+        CPU cpu = new MipsCPU(thread, systemMemory);
         return cpu;
     }
 
@@ -39,7 +39,7 @@ public class MyVirtualMachine implements VirtualMachine {
 
     @Override
     public MemoryMgr getMemoryMgr() {
-        return null;
+        return new MyMemoryManager();
     }
 
     @Override

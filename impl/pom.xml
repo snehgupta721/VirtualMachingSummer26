@@ -15,11 +15,22 @@ he.org/xsd/maven-4.0.0.xsd">
     <packaging>jar</packaging>
 
     <dependencies>
-      <dependency>
-        <groupId>com.kondra.training.vm</groupId>
-        <artifactId>common</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>com.kondra.training.vm</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.38</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.42</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     
 </project>

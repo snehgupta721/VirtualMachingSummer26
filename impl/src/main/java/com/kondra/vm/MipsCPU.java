@@ -261,7 +261,7 @@ public class MipsCPU implements CPU {
                 break;
             case 3:
                 // jal
-                registers[31] = nextPtr;
+                registers[CPU.REG_RA] = nextPtr;
                 nextPtr = (target << 2) | ((iPtr + 4) & 0xFFFFFFF0);
                 break;
             case 4:
@@ -296,6 +296,15 @@ public class MipsCPU implements CPU {
                     nextPtr = iPtr + 4;
                 }
                 break;
+            case 20:
+                // b
+                nextPtr = iPtr + (immediate << 2);
+                break;
+            case 21:
+                // bal
+                registers[CPU.REG_RA] = nextPtr;
+                nextPtr = iPtr + (immediate << 2);
+                break;
         }
     }
 
@@ -322,7 +331,7 @@ public class MipsCPU implements CPU {
                 break;
             case 16:
                 // bltzal
-                registers[31] = nextPtr;
+                registers[CPU.REG_RA] = nextPtr;
                 if (registers[rs] < 0) {
                     nextPtr = iPtr + (int) (offset << 2);
                 } else {
@@ -331,7 +340,7 @@ public class MipsCPU implements CPU {
                 break;
             case 17:
                 // bgezal
-                registers[31] = nextPtr;
+                registers[CPU.REG_RA] = nextPtr;
                 if (registers[rs] >= 0) {
                     nextPtr = iPtr + (int) (offset << 2);
                 } else {

@@ -1,6 +1,8 @@
-com/kondra/vm/MyVirtualMachine.class
-com/kondra/vm/mmu/MemoryBlocks.class
+com/kondra/vm/MyVmxFile.class
 com/kondra/vm/mmu/Block.class
 com/kondra/vm/MyMemoryManager.class
 com/kondra/vm/MemoryAccess.class
+com/kondra/vm/MyVirtualMachine.class
+com/kondra/vm/MyVmxExt.class
+com/kondra/vm/mmu/MemoryBlocks.class
 com/kondra/vm/MipsCPU.class

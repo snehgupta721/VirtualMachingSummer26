@@ -44,12 +44,12 @@ public class MyVirtualMachine implements VirtualMachine {
 
     @Override
     public VmxFile loadVmxFile(File file) throws VmxException {
-        return null;
+        return new MyVmxFile(file);
     }
 
     @Override
     public VmxFile emptyVmxFile() {
-        return null;
+        return new MyVmxFile();
     }
 
     @Override

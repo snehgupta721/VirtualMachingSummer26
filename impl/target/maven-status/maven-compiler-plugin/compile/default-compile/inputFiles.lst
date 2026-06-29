@@ -2,7 +2,10 @@
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/MipsCPU.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/MyMemoryManager.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/MyVirtualMachine.java
-/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/MyVmxExt.java
-/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/MyVmxFile.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/mmu/Block.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/mmu/MemoryBlocks.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/ArrayProcessor.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/MyVmxExt.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/MyVmxFile.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/VmxExtensionReader.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/VmxHeaderReader.java

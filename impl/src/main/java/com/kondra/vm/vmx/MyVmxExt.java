@@ -1,7 +1,6 @@
-package com.kondra.vm;
+package com.kondra.vm.vmx;
 
 import com.kondra.vm.common.vmx.VmxExt;
-import lombok.Getter;
 
 public class MyVmxExt implements VmxExt {
     private final int type;

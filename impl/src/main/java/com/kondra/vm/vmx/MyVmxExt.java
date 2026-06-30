@@ -1,4 +1,4 @@
-package com.kondra.vm.vmx.extensions;
+package com.kondra.vm.vmx;
 
 import com.kondra.vm.common.vmx.VmxExt;
 import lombok.Getter;

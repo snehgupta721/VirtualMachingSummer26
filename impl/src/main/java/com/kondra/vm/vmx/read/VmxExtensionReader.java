@@ -1,7 +1,8 @@
-package com.kondra.vm.vmx;
+package com.kondra.vm.vmx.read;
 
 import com.kondra.vm.common.vmx.VmxExt;
-import com.kondra.vm.vmx.extensions.MyVmxExt;
+import com.kondra.vm.vmx.MyVmxExt;
+import com.kondra.vm.vmx.VmxHeader;
 import com.kondra.vm.vmx.extensions.RelocationExtension;
 
 import java.util.ArrayList;
@@ -11,11 +12,9 @@ import java.util.List;
 import static com.kondra.vm.vmx.ArrayProcessor.readInt;
 
 public class VmxExtensionReader {
-    private static final int EXT_HEADER_START = 56; // 24 + 32
-
     public static List<VmxExt> parseExtensions(byte[] fileBytes, int extCount, int headerSize) {
         List<VmxExt> extensions = new ArrayList<>();
-        int cursor = EXT_HEADER_START;
+        int cursor = VmxHeader.EXT_HEADER_START;
 
         for (int i = 0; i < extCount; i++) {
             int type    = fileBytes[cursor] & 0xFF;

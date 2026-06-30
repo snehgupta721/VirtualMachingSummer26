@@ -4,6 +4,8 @@ import com.kondra.vm.common.Version;
 import com.kondra.vm.common.vmx.VmxException;
 import com.kondra.vm.common.vmx.VmxExt;
 import com.kondra.vm.common.vmx.VmxFile;
+import com.kondra.vm.vmx.read.VmxExtensionReader;
+import com.kondra.vm.vmx.read.VmxHeaderReader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,7 +38,7 @@ public class MyVmxFile implements VmxFile {
             throw new VmxException("Error reading file " + file.getAbsolutePath(), e);
         }
 
-        VmxHeaderReader header = new VmxHeaderReader(fileBytes);
+        VmxHeader header = VmxHeaderReader.parseHeader(fileBytes);
         flags = header.getFlags();
         version = header.getVersion();
         entryOffset = header.getEntryOffset();

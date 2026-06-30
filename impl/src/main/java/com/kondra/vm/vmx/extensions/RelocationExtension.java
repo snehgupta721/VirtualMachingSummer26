@@ -4,6 +4,7 @@ import com.kondra.vm.common.vmx.VmxFile;
 import com.kondra.vm.common.vmx.ext.Relocation;
 import com.kondra.vm.common.vmx.ext.RelocationExt;
 import com.kondra.vm.vmx.ArrayProcessor;
+import com.kondra.vm.vmx.MyVmxExt;
 
 import java.util.ArrayList;
 import java.util.HashMap;

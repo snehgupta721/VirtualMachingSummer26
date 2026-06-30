@@ -21,8 +21,12 @@ public class ArrayProcessor {
         return (short) (one | two);
     }
 
-    public static int readByte(byte[] bytes, int offset) {
+    public static int readByteUnsigned(byte[] bytes, int offset) {
         return bytes[offset] & 0xFF;
+    }
+
+    public static int readByteSigned(byte[] bytes, int offset) {
+        return bytes[offset];
     }
 
     public static void writeInt(byte[] dest, int offset, int value) {

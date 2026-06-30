@@ -1,6 +1,8 @@
 package com.kondra.vm.vmx;
 
 import com.kondra.vm.common.vmx.VmxExt;
+import com.kondra.vm.vmx.extensions.MyVmxExt;
+import com.kondra.vm.vmx.extensions.RelocationExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +26,15 @@ public class VmxExtensionReader {
             // Using absolute offset directly
             byte[] extData = Arrays.copyOfRange(fileBytes, headerSize + offset, headerSize + offset + size);
 
-            extensions.add(new MyVmxExt(type, extFlag, extData));
+            VmxExt curr;
+            switch (type) {
+                case VmxExt.TYPE_RELOC:
+                    curr = new RelocationExtension(type, extFlag, extData);
+                    break;
+                default:
+                    curr = new MyVmxExt(type, extFlag, extData);
+            }
+            extensions.add(curr);
             cursor += VmxExt.HEADER_SIZE;
         }
         return extensions;

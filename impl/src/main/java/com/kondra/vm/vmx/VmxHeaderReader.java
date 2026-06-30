@@ -6,16 +6,16 @@ import com.kondra.vm.common.vmx.VmxException;
 import static com.kondra.vm.vmx.ArrayProcessor.*;
 
 public class VmxHeaderReader {
-    public final int extCount;
-    public final int flags;
-    public final Version version;
-    public final int entryOffset;
-    public final int headerSize;
+    private final int extCount;
+    private final int flags;
+    private final Version version;
+    private final int entryOffset;
+    private final int headerSize;
 
-    public final int textOffset, textSize;
-    public final int rodataOffset, rodataSize;
-    public final int dataOffset, dataSize;
-    public final int bssOffset, bssSize;
+    private final int textOffset, textSize;
+    private final int rodataOffset, rodataSize;
+    private final int dataOffset, dataSize;
+    private final int bssOffset, bssSize;
 
     public VmxHeaderReader(byte[] bytes) throws VmxException {
         if ((bytes[0] & 0xFF) != 'v' || (bytes[1] & 0xFF) != 'm' ||
@@ -23,15 +23,15 @@ public class VmxHeaderReader {
             throw new VmxException("File signature incorrect");
         }
 
-        extCount = readByte(bytes, 4);
-        flags = readByte(bytes, 6);
+        extCount = readByteUnsigned(bytes, 4);
+        flags = readByteUnsigned(bytes, 6);
         // This will always be little endian
         if (flags != 8) {
             throw new VmxException("Incorrect flag: Should be little endian");
         }
 
-        int major = bytes[8];   // signed
-        int minor = bytes[9];   // signed
+        int major = readByteSigned(bytes, 8);   // signed
+        int minor = readByteSigned(bytes, 9);   // signed
         short buildNum = readShort(bytes, 10);
         version = new Version(major, minor, buildNum);
 
@@ -48,5 +48,57 @@ public class VmxHeaderReader {
         bssSize      = readInt(bytes, 52);
 
         headerSize = 24 + 32 + (12 * extCount);
+    }
+
+    public int getExtCount() {
+        return extCount;
+    }
+
+    public int getFlags() {
+        return flags;
+    }
+
+    public Version getVersion() {
+        return version;
+    }
+
+    public int getEntryOffset() {
+        return entryOffset;
+    }
+
+    public int getHeaderSize() {
+        return headerSize;
+    }
+
+    public int getTextOffset() {
+        return textOffset;
+    }
+
+    public int getTextSize() {
+        return textSize;
+    }
+
+    public int getRodataOffset() {
+        return rodataOffset;
+    }
+
+    public int getRodataSize() {
+        return rodataSize;
+    }
+
+    public int getDataOffset() {
+        return dataOffset;
+    }
+
+    public int getDataSize() {
+        return dataSize;
+    }
+
+    public int getBssOffset() {
+        return bssOffset;
+    }
+
+    public int getBssSize() {
+        return bssSize;
     }
 }

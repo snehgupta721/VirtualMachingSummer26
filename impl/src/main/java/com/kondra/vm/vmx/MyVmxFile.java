@@ -37,19 +37,19 @@ public class MyVmxFile implements VmxFile {
         }
 
         VmxHeaderReader header = new VmxHeaderReader(fileBytes);
-        flags = header.flags;
-        version = header.version;
-        entryOffset = header.entryOffset;
+        flags = header.getFlags();
+        version = header.getVersion();
+        entryOffset = header.getEntryOffset();
 
-        text   = Arrays.copyOfRange(fileBytes, header.headerSize + header.textOffset,
-                header.headerSize + header.textOffset + header.textSize);
-        rodata = Arrays.copyOfRange(fileBytes, header.headerSize + header.rodataOffset,
-                header.headerSize + header.rodataOffset + header.rodataSize);
-        data   = Arrays.copyOfRange(fileBytes, header.headerSize + header.dataOffset,
-                header.headerSize + header.dataOffset + header.dataSize);
-        bss    = new byte[header.bssSize];
+        text   = Arrays.copyOfRange(fileBytes, header.getHeaderSize() + header.getTextOffset(),
+                header.getHeaderSize() + header.getTextOffset() + header.getTextSize());
+        rodata = Arrays.copyOfRange(fileBytes, header.getHeaderSize() + header.getRodataOffset(),
+                header.getHeaderSize() + header.getRodataOffset() + header.getRodataSize());
+        data   = Arrays.copyOfRange(fileBytes, header.getHeaderSize() + header.getDataOffset(),
+                header.getHeaderSize() + header.getDataOffset() + header.getDataSize());
+        bss    = new byte[header.getBssSize()];
 
-        extensions.addAll(VmxExtensionReader.parseExtensions(fileBytes, header.extCount, header.headerSize));
+        extensions.addAll(VmxExtensionReader.parseExtensions(fileBytes, header.getExtCount(), header.getHeaderSize()));
     }
 
     @Override

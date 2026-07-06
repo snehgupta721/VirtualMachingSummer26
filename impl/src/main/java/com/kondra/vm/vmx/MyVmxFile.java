@@ -6,16 +6,17 @@ import com.kondra.vm.common.vmx.VmxExt;
 import com.kondra.vm.common.vmx.VmxFile;
 import com.kondra.vm.vmx.read.VmxExtensionReader;
 import com.kondra.vm.vmx.read.VmxHeaderReader;
+import com.kondra.vm.vmx.write.VmxExtensionWriter;
+import com.kondra.vm.vmx.write.VmxHeaderWriter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.List;
 
 public class MyVmxFile implements VmxFile {
-    private int flags;
-    private Version version;
-    private int entryOffset;
+    VmxHeader header;
 
     private final List<VmxExt> extensions = new java.util.ArrayList<>();
 
@@ -38,10 +39,7 @@ public class MyVmxFile implements VmxFile {
             throw new VmxException("Error reading file " + file.getAbsolutePath(), e);
         }
 
-        VmxHeader header = VmxHeaderReader.parseHeader(fileBytes);
-        flags = header.getFlags();
-        version = header.getVersion();
-        entryOffset = header.getEntryOffset();
+        header = VmxHeaderReader.parseHeader(fileBytes);
 
         text   = Arrays.copyOfRange(fileBytes, header.getHeaderSize() + header.getTextOffset(),
                 header.getHeaderSize() + header.getTextOffset() + header.getTextSize());
@@ -56,69 +54,26 @@ public class MyVmxFile implements VmxFile {
 
     @Override
     public void write(File file) throws VmxException {
-//        int extCount = extensions.size();
-//        int headerSize = 24 + 32 + (12 * extCount);
-//        int textOffset   = 0;
-//        int roDataOffset = textOffset + text.length;
-//        int dataOffset   = roDataOffset + rodata.length;
-//        int bssOffset    = dataOffset + data.length;
-//
-//        int cursor = bssOffset;
-//        int[] extOffsets = new int[extCount];
-//        for (int i = 0; i < extCount; i++) {
-//            extOffsets[i] = cursor;
-//            MyVmxExt ext = (MyVmxExt) extensions.get(i);
-//            cursor += ext.getData().length;
-//            // Add padding so that the section is always aligned
-//            if (cursor % 4 != 0) {
-//                cursor += (4 - (cursor % 4));
-//            }
-//        }
-//        byte[] fileBytes = new byte[headerSize + cursor];
-//
-//        fileBytes[0] = 'v';
-//        fileBytes[1] = 'm';
-//        fileBytes[2] = 'x';
-//        fileBytes[3] = '\0';
-//
-//        fileBytes[4] = (byte) extCount;
-//        fileBytes[6] = (byte) flags;
-//
-//        writeShort(fileBytes, 8, (short) version.getMajor());
-//        writeShort(fileBytes, 10, (short) version.getMinor());
-//        writeInt(fileBytes, 12, version.getBuildNum());
-//        writeInt(fileBytes, 20, entryOffset);
-//
-//        // section headers
-//        writeInt(fileBytes, 24, textOffset);
-//        writeInt(fileBytes, 28, text.length);
-//        writeInt(fileBytes, 32, roDataOffset);
-//        writeInt(fileBytes, 36, rodata.length);
-//        writeInt(fileBytes, 40, dataOffset);
-//        writeInt(fileBytes, 44, data.length);
-//        writeInt(fileBytes, 48, bssOffset);
-//        writeInt(fileBytes, 52, bss.length);
-//
-//        System.arraycopy(text, 0, fileBytes, headerSize + textOffset, text.length);
-//        System.arraycopy(rodata, 0, fileBytes, headerSize + roDataOffset, rodata.length);
-//        System.arraycopy(data, 0, fileBytes, headerSize + dataOffset, data.length);
-//
-//        cursor = 24 + 32;
-//        for (int i = 0; i < extCount; i++) {
-//            MyVmxExt ext = (MyVmxExt) extensions.get(i);
-//            fileBytes[cursor] = (byte) ext.getType();
-//            fileBytes[cursor + 1] = (byte) ext.getFlags();
-//            writeInt(fileBytes, cursor + 4, extOffsets[i]);
-//            writeInt(fileBytes, cursor + 8, ext.getData().length);
-//            System.arraycopy(ext.getData(), 0, fileBytes, headerSize + extOffsets[i], ext.getData().length);
-//            cursor += VmxExt.HEADER_SIZE;
-//        }
-//
-//        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
-//            fos.write(fileBytes);
-//        } catch (Exception e) {
-//            throw new VmxException("Failed to write VMX to file: " + file.getAbsolutePath(), e);
-//        }
+        int headerSize = header.getHeaderSize();
+        int total = headerSize + text.length + rodata.length + data.length;
+        for (VmxExt ext : extensions) {
+            total += ((MyVmxExt) ext).getData().length; // Assuming getData() exists to fetch the raw byte[]
+        }
+
+        byte[] bytes = new byte[total];
+        VmxHeaderWriter.writeHeader(header, bytes);
+
+        int cursor = VmxExtensionWriter.writeExtensions(bytes, extensions, headerSize);
+
+        System.arraycopy(text, 0, bytes, headerSize + header.getTextOffset(), text.length);
+        System.arraycopy(rodata, 0, bytes, headerSize + header.getRodataOffset(), rodata.length);
+        System.arraycopy(data, 0, bytes, headerSize + header.getDataOffset(), data.length);
+
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(bytes);
+        } catch (Exception e) {
+            throw new VmxException("Error writing file " + file.getAbsolutePath(), e);
+        }
     }
 
     @Override
@@ -167,33 +122,31 @@ public class MyVmxFile implements VmxFile {
 
     @Override
     public Version getVersion() {
-        return version;
+        return header.getVersion();
     }
 
     @Override
     public void setVersion(Version version) {
-        this.version = version;
+        this.header.setVersion(version);
     }
 
     @Override
     public int getFlags() {
-        return flags;
+        return header.getFlags();
     }
 
     @Override
     public void setFlags(int flags) {
-        this.flags = flags;
+        header.setFlags(flags);
     }
 
     @Override
     public int getEntryOffset() {
-        return entryOffset;
+        return header.getEntryOffset();
     }
 
     @Override
     public void setEntryOffset(int entryOffset) {
-        this.entryOffset = entryOffset;
+        header.setEntryOffset(entryOffset);
     }
-
-
 }

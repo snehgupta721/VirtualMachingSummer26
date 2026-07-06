@@ -14,29 +14,29 @@ public class VmxHeaderReader {
             throw new VmxException("File signature incorrect");
         }
 
-        header.setExtCount(readByteUnsigned(bytes, 4));
-        header.setFlags(readByteUnsigned(bytes, 6));
+        header.setExtCount(readByteUnsigned(bytes, VmxHeader.OFFSET_EXT_COUNT));
+        header.setFlags(readByteUnsigned(bytes, VmxHeader.OFFSET_FLAGS));
         // This will always be little endian
         if (header.getFlags() != 8) {
             throw new VmxException("Incorrect flag: Should be little endian");
         }
 
-        int major = readByteSigned(bytes, 8);   // signed
-        int minor = readByteSigned(bytes, 9);   // signed
-        short buildNum = readShort(bytes, 10);
+        int major = readByteSigned(bytes, VmxHeader.OFFSET_VERSION_MAJOR);   // signed
+        int minor = readByteSigned(bytes, VmxHeader.OFFSET_VERSION_MINOR);   // signed
+        short buildNum = readShort(bytes, VmxHeader.OFFSET_VERSION_BUILD_NUM);
         header.setVersion(new Version(major, minor, buildNum));
 
-        header.setEntryOffset(readInt(bytes, 20));
+        header.setEntryOffset(readInt(bytes, VmxHeader.OFFSET_ENTRY_OFFSET));
 
         // Section Headers (Absolute file offsets)
-        header.setTextOffset(readInt(bytes, 24));
-        header.setTextSize(readInt(bytes, 28));
-        header.setRodataOffset(readInt(bytes, 32));
-        header.setRodataSize(readInt(bytes, 36));
-        header.setDataOffset(readInt(bytes, 40));
-        header.setDataSize(readInt(bytes, 44));
-        header.setBssOffset(readInt(bytes, 48));
-        header.setBssSize(readInt(bytes, 52));
+        header.setTextOffset(readInt(bytes, VmxHeader.OFFSET_TEXT_OFFSET));
+        header.setTextSize(readInt(bytes, VmxHeader.OFFSET_TEXT_SIZE));
+        header.setRodataOffset(readInt(bytes, VmxHeader.OFFSET_RODATA_OFFSET));
+        header.setRodataSize(readInt(bytes, VmxHeader.OFFSET_RODATA_SIZE));
+        header.setDataOffset(readInt(bytes, VmxHeader.OFFSET_DATA_OFFSET));
+        header.setDataSize(readInt(bytes, VmxHeader.OFFSET_DATA_SIZE));
+        header.setBssOffset(readInt(bytes, VmxHeader.OFFSET_BSS_OFFSET));
+        header.setBssSize(readInt(bytes, VmxHeader.OFFSET_BSS_SIZE));
 
         header.setHeaderSize(VmxHeader.EXT_HEADER_START + (12 * header.getExtCount()));
         return header;

@@ -1,9 +1,7 @@
 package com.kondra.vm.vmx;
 
 import com.kondra.vm.common.vmx.VmxExt;
-import lombok.Getter;
 
-@Getter
 public class MyVmxExt implements VmxExt {
     private final int type;
     private final int flags;
@@ -18,5 +16,13 @@ public class MyVmxExt implements VmxExt {
     @Override
     public int getType() {
         return type;
+    }
+
+    public int getFlags() {
+        return flags;
+    }
+
+    public byte[] getData() {
+        return data;
     }
 }

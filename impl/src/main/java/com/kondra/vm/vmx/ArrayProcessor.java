@@ -36,8 +36,12 @@ public class ArrayProcessor {
         dest[offset + 3] = (byte) (value >>> 24);
     }
 
-    public static void writeShort(byte[] dest, int offset, short value) {
+    public static void writeShort(byte[] dest, int offset, int value) {
         dest[offset]     = (byte) value;
         dest[offset + 1] = (byte) (value >>> 8);
+    }
+
+    public static void writeByte(byte[] dest, int offset, int value) {
+        dest[offset]     = (byte) value;
     }
 }

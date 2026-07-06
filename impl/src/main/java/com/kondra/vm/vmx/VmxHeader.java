@@ -4,6 +4,20 @@ import com.kondra.vm.common.Version;
 
 public class VmxHeader {
     public static final int EXT_HEADER_START = 56;
+    public static final int OFFSET_EXT_COUNT = 4;
+    public static final int OFFSET_FLAGS = 6;
+    public static final int OFFSET_VERSION_MAJOR = 8;
+    public static final int OFFSET_VERSION_MINOR = 9;
+    public static final int OFFSET_VERSION_BUILD_NUM = 10;
+    public static final int OFFSET_ENTRY_OFFSET = 20;
+    public static final int OFFSET_TEXT_OFFSET = 24;
+    public static final int OFFSET_TEXT_SIZE = 28;
+    public static final int OFFSET_RODATA_OFFSET = 32;
+    public static final int OFFSET_RODATA_SIZE = 36;
+    public static final int OFFSET_DATA_OFFSET = 40;
+    public static final int OFFSET_DATA_SIZE = 44;
+    public static final int OFFSET_BSS_OFFSET = 48;
+    public static final int OFFSET_BSS_SIZE = 52;
 
     private int extCount;
     private int flags;

@@ -90,4 +90,23 @@ public class RelocationRecord implements Relocation {
     public void setAffinityTableIndex(int idx) {
         this.affinityTableIndex = idx;
     }
+
+    public int getWord1() {
+        return (type & 0x3) | (fixupOffset & 0xfffffffc);
+    }
+
+    public int getWord2() {
+        int word2 = 0;
+        if (dynamic) {
+            // Set the dynamic flag bit
+            word2 |= 0x40000000;
+
+            word2 |= (affinityTableIndex & 0xff) << 16;
+            word2 |= (dynamicSymbolOffset & 0xffff);
+        } else {
+            word2 |= (section & 0xf) << 26;
+            word2 |= (sectionOffset & 0x03ffffff);
+        }
+        return word2;
+    }
 }

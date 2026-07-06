@@ -36,6 +36,45 @@ public class RelocationExtension extends MyVmxExt implements RelocationExt {
         parseRelocationRecords(VmxFile.SECTION_BSS, bssOffset, bssSize, data);
     }
 
+    public void write(byte[] result, int offset, int headerSize) {
+        int cursor = offset;
+        int payloadCursor = 32 + offset;
+
+        int[] sectionsOrder = {
+                com.kondra.vm.common.vmx.VmxFile.SECTION_TEXT,
+                com.kondra.vm.common.vmx.VmxFile.SECTION_RODATA,
+                com.kondra.vm.common.vmx.VmxFile.SECTION_DATA,
+                com.kondra.vm.common.vmx.VmxFile.SECTION_BSS
+        };
+
+        for (Integer section : sectionsOrder) {
+            List<Relocation> list = relocations.getOrDefault(section, null);
+            if (list == null) {
+                // Write 0 offset and 0 size if section is missing
+                ArrayProcessor.writeInt(result, cursor, 0);
+                ArrayProcessor.writeInt(result, cursor + 4, 0);
+                cursor += 8;
+                continue;
+            }
+
+            ArrayProcessor.writeInt(result, cursor, payloadCursor - offset);
+            ArrayProcessor.writeInt(result, cursor + 4, list.size() * 8);
+            writeRelocationRecords(section, payloadCursor, result);
+            cursor += 8;
+            payloadCursor += list.size() * 8;
+        }
+    }
+
+    private void writeRelocationRecords(int section, int offset, byte[] result) {
+        int cursor = offset;
+        for (Relocation reloc : relocations.get(section)) {
+            RelocationRecord record = (RelocationRecord) reloc;
+            ArrayProcessor.writeInt(result, cursor, record.getWord1());
+            ArrayProcessor.writeInt(result, cursor + 4, record.getWord2());
+            cursor += 8;
+        }
+    }
+
     private void parseRelocationRecords(int section, int offset, int size, byte[] data) {
         List<Relocation> currRelocs = new ArrayList<>();
         int cursor = offset;

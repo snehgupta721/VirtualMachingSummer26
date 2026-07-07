@@ -5,10 +5,13 @@ import com.kondra.vm.common.Version;
 public class VmxHeader {
     public static final int EXT_HEADER_START = 56;
     public static final int OFFSET_EXT_COUNT = 4;
+    public static final int OFFSET_VMX_VERSION = 5;
     public static final int OFFSET_FLAGS = 6;
     public static final int OFFSET_VERSION_MAJOR = 8;
     public static final int OFFSET_VERSION_MINOR = 9;
     public static final int OFFSET_VERSION_BUILD_NUM = 10;
+    public static final int OFFSET_FILE_SIZE = 12;
+    public static final int OFFSET_PROGRAM_SIZE = 16;
     public static final int OFFSET_ENTRY_OFFSET = 20;
     public static final int OFFSET_TEXT_OFFSET = 24;
     public static final int OFFSET_TEXT_SIZE = 28;
@@ -20,6 +23,7 @@ public class VmxHeader {
     public static final int OFFSET_BSS_SIZE = 52;
 
     private int extCount;
+    private int vmxVersion = 2;
     private int flags;
     private Version version;
     private int entryOffset;
@@ -31,6 +35,10 @@ public class VmxHeader {
     private int bssOffset, bssSize;
 
     public VmxHeader() {}
+
+    public int getVmxVersion() {
+        return vmxVersion;
+    }
 
     public int getExtCount() {
         return extCount;
@@ -135,4 +143,5 @@ public class VmxHeader {
     public void setBssSize(int bssSize) {
         this.bssSize = bssSize;
     }
+
 }

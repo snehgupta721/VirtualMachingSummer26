@@ -10,9 +10,8 @@ import java.util.List;
 
 public class VmxExtensionWriter {
 
-    public static int writeExtensions(byte[] bytes, List<VmxExt> extensions, int headerSize) {
+    public static int writeExtensions(byte[] bytes, List<VmxExt> extensions, int headerSize, int payloadOffset) {
         int offset = VmxHeader.EXT_HEADER_START;
-        int payloadOffset = headerSize;
 
         for (VmxExt extension : extensions) {
             // Align the payload offset

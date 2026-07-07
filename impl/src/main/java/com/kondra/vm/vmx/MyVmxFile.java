@@ -52,22 +52,33 @@ public class MyVmxFile implements VmxFile {
         extensions.addAll(VmxExtensionReader.parseExtensions(fileBytes, header.getExtCount(), header.getHeaderSize()));
     }
 
-    @Override
-    public void write(File file) throws VmxException {
+    private int getFileSize() {
         int headerSize = header.getHeaderSize();
         int total = headerSize + text.length + rodata.length + data.length;
         for (VmxExt ext : extensions) {
             total += ((MyVmxExt) ext).getData().length; // Assuming getData() exists to fetch the raw byte[]
         }
+        return total;
+    }
 
+    private int getProgramSize() {
+        return text.length + rodata.length + data.length;
+    }
+
+    @Override
+    public void write(File file) throws VmxException {
+        int total = getFileSize();
         byte[] bytes = new byte[total];
-        VmxHeaderWriter.writeHeader(header, bytes);
+        VmxHeaderWriter.writeHeader(header, bytes, total, getProgramSize());
 
-        int cursor = VmxExtensionWriter.writeExtensions(bytes, extensions, headerSize);
-
-        System.arraycopy(text, 0, bytes, headerSize + header.getTextOffset(), text.length);
-        System.arraycopy(rodata, 0, bytes, headerSize + header.getRodataOffset(), rodata.length);
-        System.arraycopy(data, 0, bytes, headerSize + header.getDataOffset(), data.length);
+//        System.arraycopy(text, 0, bytes, headerSize + header.getTextOffset(), text.length);
+//        System.arraycopy(rodata, 0, bytes, headerSize + header.getRodataOffset(), rodata.length);
+//        System.arraycopy(data, 0, bytes, headerSize + header.getDataOffset(), data.length);
+//
+//        int sectionsEnd = headerSize + Math.max(header.getTextOffset() + text.length,
+//                Math.max(header.getRodataOffset() + rodata.length,
+//                        header.getDataOffset() + data.length));
+//        int cursor = VmxExtensionWriter.writeExtensions(bytes, extensions, headerSize, sectionsEnd);
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(bytes);

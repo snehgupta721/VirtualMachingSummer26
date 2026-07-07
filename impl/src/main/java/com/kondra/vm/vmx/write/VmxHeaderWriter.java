@@ -6,13 +6,14 @@ import com.kondra.vm.vmx.VmxHeader;
 import static com.kondra.vm.vmx.ArrayProcessor.*;
 
 public class VmxHeaderWriter {
-    public static void writeHeader(VmxHeader header, byte[] bytes) {
+    public static void writeHeader(VmxHeader header, byte[] bytes, int fileSize, int programSize) {
         bytes[0] = 'v';
         bytes[1] = 'm';
         bytes[2] = 'x';
         bytes[3] = '\0';
 
         writeByte(bytes, VmxHeader.OFFSET_EXT_COUNT, header.getExtCount());
+        writeByte(bytes, VmxHeader.OFFSET_VMX_VERSION, header.getVmxVersion());
         writeByte(bytes, VmxHeader.OFFSET_FLAGS, header.getFlags());
 
         Version version = header.getVersion();
@@ -20,6 +21,8 @@ public class VmxHeaderWriter {
         writeByte(bytes, VmxHeader.OFFSET_VERSION_MINOR, version.getMinor());
         writeShort(bytes, VmxHeader.OFFSET_VERSION_BUILD_NUM, version.getBuildNum());
 
+        writeInt(bytes, VmxHeader.OFFSET_FILE_SIZE, fileSize);
+        writeInt(bytes, VmxHeader.OFFSET_PROGRAM_SIZE, programSize);
         writeInt(bytes, VmxHeader.OFFSET_ENTRY_OFFSET, header.getEntryOffset());
 
         writeInt(bytes, VmxHeader.OFFSET_TEXT_OFFSET, header.getTextOffset());

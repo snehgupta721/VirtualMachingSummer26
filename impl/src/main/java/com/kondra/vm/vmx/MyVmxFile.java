@@ -71,14 +71,12 @@ public class MyVmxFile implements VmxFile {
         byte[] bytes = new byte[total];
         VmxHeaderWriter.writeHeader(header, bytes, total, getProgramSize());
 
-//        System.arraycopy(text, 0, bytes, headerSize + header.getTextOffset(), text.length);
-//        System.arraycopy(rodata, 0, bytes, headerSize + header.getRodataOffset(), rodata.length);
-//        System.arraycopy(data, 0, bytes, headerSize + header.getDataOffset(), data.length);
-//
-//        int sectionsEnd = headerSize + Math.max(header.getTextOffset() + text.length,
-//                Math.max(header.getRodataOffset() + rodata.length,
-//                        header.getDataOffset() + data.length));
-//        int cursor = VmxExtensionWriter.writeExtensions(bytes, extensions, headerSize, sectionsEnd);
+        System.arraycopy(text, 0, bytes, header.getHeaderSize() + header.getTextOffset(), text.length);
+        System.arraycopy(rodata, 0, bytes, header.getHeaderSize() + header.getRodataOffset(), rodata.length);
+        System.arraycopy(data, 0, bytes, header.getHeaderSize() + header.getDataOffset(), data.length);
+
+        int sectionsEnd = header.getHeaderSize() + text.length + rodata.length + data.length;
+        VmxExtensionWriter.writeExtensions(bytes, extensions, header.getHeaderSize(), sectionsEnd);
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(bytes);

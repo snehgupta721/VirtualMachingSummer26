@@ -36,9 +36,9 @@ public class RelocationExtension extends MyVmxExt implements RelocationExt {
         parseRelocationRecords(VmxFile.SECTION_BSS, bssOffset, bssSize, data);
     }
 
-    public void write(byte[] result, int offset, int headerSize) {
+    public void write(byte[] result, int offset) {
         int cursor = offset;
-        int payloadCursor = 32 + offset;
+        int payloadCursor = (4 * 8) + offset;
 
         int[] sectionsOrder = {
                 com.kondra.vm.common.vmx.VmxFile.SECTION_TEXT,
@@ -50,24 +50,25 @@ public class RelocationExtension extends MyVmxExt implements RelocationExt {
         for (Integer section : sectionsOrder) {
             List<Relocation> list = relocations.getOrDefault(section, null);
             if (list == null) {
-                // Write 0 offset and 0 size if section is missing
-                ArrayProcessor.writeInt(result, cursor, 0);
-                ArrayProcessor.writeInt(result, cursor + 4, 0);
+                // If the section is missing, just continue
                 cursor += 8;
                 continue;
             }
 
+            System.out.println("Offset: " + cursor);
+            System.out.println("Payload offset relaive: " + (payloadCursor - offset));
+            System.out.println("Relocations: " + list.size());
             ArrayProcessor.writeInt(result, cursor, payloadCursor - offset);
             ArrayProcessor.writeInt(result, cursor + 4, list.size() * 8);
-            writeRelocationRecords(section, payloadCursor, result);
+            writeRelocationRecords(result, list, payloadCursor);
             cursor += 8;
             payloadCursor += list.size() * 8;
         }
     }
 
-    private void writeRelocationRecords(int section, int offset, byte[] result) {
+    private void writeRelocationRecords(byte[] result, List<Relocation> relocs, int offset) {
         int cursor = offset;
-        for (Relocation reloc : relocations.get(section)) {
+        for (Relocation reloc : relocs) {
             RelocationRecord record = (RelocationRecord) reloc;
             ArrayProcessor.writeInt(result, cursor, record.getWord1());
             ArrayProcessor.writeInt(result, cursor + 4, record.getWord2());

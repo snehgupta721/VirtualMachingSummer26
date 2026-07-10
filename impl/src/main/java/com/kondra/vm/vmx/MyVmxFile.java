@@ -4,114 +4,96 @@ import com.kondra.vm.common.Version;
 import com.kondra.vm.common.vmx.VmxException;
 import com.kondra.vm.common.vmx.VmxExt;
 import com.kondra.vm.common.vmx.VmxFile;
+import com.kondra.vm.vmx.data.SectionOffsets;
+import com.kondra.vm.vmx.data.VmxHeader;
+import com.kondra.vm.vmx.read.SectionHeaderReader;
+import com.kondra.vm.vmx.read.SectionReader;
 import com.kondra.vm.vmx.read.VmxExtensionReader;
 import com.kondra.vm.vmx.read.VmxHeaderReader;
-import com.kondra.vm.vmx.write.VmxExtensionWriter;
-import com.kondra.vm.vmx.write.VmxHeaderWriter;
+import com.kondra.vm.vmx.data.Section;
+import com.kondra.vm.vmx.data.SectionHeader;
+import com.kondra.vm.vmx.write.*;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.Arrays;
-import java.util.List;
+import java.io.RandomAccessFile;
+import java.util.*;
+
+import static com.kondra.vm.vmx.ArrayProcessor.writeInt;
 
 public class MyVmxFile implements VmxFile {
-    VmxHeader header;
-
-    private final List<VmxExt> extensions = new java.util.ArrayList<>();
-
-    private byte[] text;
-    private byte[] rodata;
-    private byte[] data;
-    private byte[] bss;
+    private final VmxHeader header;
+    private final List<VmxExt> extensions;
+    private final Map<Integer, Section> sections;
 
     public MyVmxFile() {
-
+        header = new VmxHeader();
+        extensions = new ArrayList<>();
+        SectionReader sectionReader = new SectionReader();
+        sections = sectionReader.getEmptySections();
     }
 
     public MyVmxFile(File file) throws VmxException {
         // read file
-        byte[] fileBytes = new byte[(int) file.length()];
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            fis.read(fileBytes);
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+            VmxHeaderReader headerReader = new VmxHeaderReader();
+            header = headerReader.read(raf);
+            int totalHeaderSize = VmxHeader.HEADER_SIZE + SectionHeader.HEADER_SIZE + header.getExtHeaderSize();
+
+            SectionHeaderReader sectionHeaderReader = new SectionHeaderReader(raf);
+            SectionReader sectionReader = new SectionReader();
+            sections = sectionReader.read(raf, sectionHeaderReader, totalHeaderSize);
+
+            VmxExtensionReader extensionReader = new VmxExtensionReader();
+            extensions = extensionReader.read(raf, header.getExtCount(), totalHeaderSize);
         } catch (Exception e) {
             throw new VmxException("Error reading file " + file.getAbsolutePath(), e);
         }
-
-        header = VmxHeaderReader.parseHeader(fileBytes);
-
-        text   = Arrays.copyOfRange(fileBytes, header.getHeaderSize() + header.getTextOffset(),
-                header.getHeaderSize() + header.getTextOffset() + header.getTextSize());
-        rodata = Arrays.copyOfRange(fileBytes, header.getHeaderSize() + header.getRodataOffset(),
-                header.getHeaderSize() + header.getRodataOffset() + header.getRodataSize());
-        data   = Arrays.copyOfRange(fileBytes, header.getHeaderSize() + header.getDataOffset(),
-                header.getHeaderSize() + header.getDataOffset() + header.getDataSize());
-        bss    = new byte[header.getBssSize()];
-
-        extensions.addAll(VmxExtensionReader.parseExtensions(fileBytes, header.getExtCount(), header.getHeaderSize()));
-    }
-
-    private int getFileSize() {
-        int headerSize = header.getHeaderSize();
-        int total = headerSize + text.length + rodata.length + data.length;
-        for (VmxExt ext : extensions) {
-            total += ((MyVmxExt) ext).getData().length; // Assuming getData() exists to fetch the raw byte[]
-        }
-        return total;
-    }
-
-    private int getProgramSize() {
-        return text.length + rodata.length + data.length;
     }
 
     @Override
     public void write(File file) throws VmxException {
-        int total = getFileSize();
-        byte[] bytes = new byte[total];
-        VmxHeaderWriter.writeHeader(header, bytes, total, getProgramSize());
+        try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+            // clear the contents of the file
+            raf.setLength(0);
+            int programSize = getProgramSize();
 
-        System.arraycopy(text, 0, bytes, header.getHeaderSize() + header.getTextOffset(), text.length);
-        System.arraycopy(rodata, 0, bytes, header.getHeaderSize() + header.getRodataOffset(), rodata.length);
-        System.arraycopy(data, 0, bytes, header.getHeaderSize() + header.getDataOffset(), data.length);
+            VmxExtensionWriter extensionWriter = new VmxExtensionWriter();
+            int fileSize = extensionWriter.write(raf, extensions, programSize);
 
-        int sectionsEnd = header.getHeaderSize() + text.length + rodata.length + data.length;
-        VmxExtensionWriter.writeExtensions(bytes, extensions, header.getHeaderSize(), sectionsEnd);
-
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            fos.write(bytes);
+//            SectionWriter sectionWriter = new SectionWriter();
+//            int headerSize = VmxHeader.HEADER_SIZE + SectionHeader.HEADER_SIZE +
+//                                    (VmxExt.HEADER_SIZE * extensions.size());
+//            SectionOffsets sectionOffsets = sectionWriter.write(raf, sections, headerSize);
+//
+//            SectionHeaderWriter sectionHeaderWriter = new SectionHeaderWriter();
+//            sectionHeaderWriter.write(raf, sectionOffsets);
+//
+//            VmxHeaderWriter headerWriter = new VmxHeaderWriter();
+//            headerWriter.write(raf, header, programSize, fileSize);
         } catch (Exception e) {
             throw new VmxException("Error writing file " + file.getAbsolutePath(), e);
         }
     }
 
+    private int getProgramSize() {
+        int total = 0;
+        for (int sectionIdx : sections.keySet()) {
+            if (sectionIdx != VmxFile.SECTION_BSS) {
+                Section section = sections.get(sectionIdx);
+                total += section.getSize();
+            }
+        }
+        return total;
+    }
+
     @Override
     public byte[] getSection(int section) {
-        switch (section) {
-            case VmxFile.SECTION_TEXT: return text;
-            case VmxFile.SECTION_RODATA: return rodata;
-            case VmxFile.SECTION_DATA: return data;
-            case VmxFile.SECTION_BSS: return bss;
-            default: return null;
-        }
+        return sections.get(section).getData();
     }
 
     @Override
     public void setSection(int section, byte[] data) {
-        switch (section) {
-            case VmxFile.SECTION_TEXT:
-                text = data;
-                break;
-            case VmxFile.SECTION_RODATA:
-                rodata = data;
-                break;
-            case VmxFile.SECTION_DATA:
-                this.data = data;
-                break;
-            case VmxFile.SECTION_BSS:
-                bss = data;
-                break;
-        }
+        sections.get(section).setData(data);
     }
 
     @Override

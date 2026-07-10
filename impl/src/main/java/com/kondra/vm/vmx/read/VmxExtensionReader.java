@@ -1,39 +1,38 @@
 package com.kondra.vm.vmx.read;
 
 import com.kondra.vm.common.vmx.VmxExt;
-import com.kondra.vm.vmx.MyVmxExt;
-import com.kondra.vm.vmx.VmxHeader;
-import com.kondra.vm.vmx.extensions.RelocationExtension;
+import com.kondra.vm.vmx.data.VmxHeader;
+import com.kondra.vm.vmx.data.SectionHeader;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.kondra.vm.vmx.ArrayProcessor.readInt;
+import static com.kondra.vm.vmx.ArrayProcessor.readByteUnsigned;
 
 public class VmxExtensionReader {
-    public static List<VmxExt> parseExtensions(byte[] fileBytes, int extCount, int headerSize) {
+    public List<VmxExt> read(RandomAccessFile raf, int extCount, int headerSize) throws IOException {
         List<VmxExt> extensions = new ArrayList<>();
-        int cursor = VmxHeader.EXT_HEADER_START;
+        int cursor = VmxHeader.HEADER_SIZE + SectionHeader.HEADER_SIZE;
 
         for (int i = 0; i < extCount; i++) {
-            int type    = fileBytes[cursor] & 0xFF;
-            int extFlag = fileBytes[cursor + 1] & 0xFF;
-            int offset  = readInt(fileBytes, cursor + 4);
-            int size    = readInt(fileBytes, cursor + 8);
+            // Parse Extension headers
+            int type    = readByteUnsigned(raf, cursor);
+            int extFlag = readByteUnsigned(raf, cursor + 1);
+            int offset  = readInt(raf, cursor + 4);
+            int size    = readInt(raf, cursor + 8);
 
-            // Using absolute offset directly
-            byte[] extData = Arrays.copyOfRange(fileBytes, headerSize + offset, headerSize + offset + size);
-
-            VmxExt curr;
             switch (type) {
+                // parse extension
                 case VmxExt.TYPE_RELOC:
-                    curr = new RelocationExtension(type, extFlag, extData);
+                    VmxExt curr = new RelocationExtReader().read(raf, type, extFlag, headerSize + offset, size);
+                    extensions.add(curr);
                     break;
                 default:
-                    curr = new MyVmxExt(type, extFlag, extData);
+                    break;
             }
-            extensions.add(curr);
             cursor += VmxExt.HEADER_SIZE;
         }
         return extensions;

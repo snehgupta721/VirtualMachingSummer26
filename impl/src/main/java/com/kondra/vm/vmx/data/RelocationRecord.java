@@ -1,8 +1,10 @@
-package com.kondra.vm.vmx.extensions;
+package com.kondra.vm.vmx.data;
 
 import com.kondra.vm.common.vmx.ext.Relocation;
 
 public class RelocationRecord implements Relocation {
+    public static final int SIZE = 8;
+
     private int type;
     private int fixupOffset;
     private int section;
@@ -11,7 +13,7 @@ public class RelocationRecord implements Relocation {
     private int affinityTableIndex;
     private boolean dynamic;
 
-    RelocationRecord(int word1, int word2) {
+    public RelocationRecord(int word1, int word2) {
         type = word1 & 0x3;
         fixupOffset = word1 & 0xfffffffc;
         section = (word2 >> 26) & 0xf;

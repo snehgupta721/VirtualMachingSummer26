@@ -2,6 +2,7 @@ package com.kondra.vm.vmx.write;
 
 import com.kondra.vm.common.vmx.VmxFile;
 import com.kondra.vm.vmx.data.Section;
+import com.kondra.vm.vmx.data.SectionHeader;
 import com.kondra.vm.vmx.data.SectionOffsets;
 
 import java.io.IOException;
@@ -29,32 +30,33 @@ public class SectionWriter {
         for (int sectionIdx : sectionsOrder) {
             Section section = sections.get(sectionIdx);
 
-            raf.seek(currOffset);
-            raf.write(section.getData(), 0, section.getData().length);
+            if (sectionIdx != VmxFile.SECTION_BSS) {
+                raf.seek(currOffset);
+                raf.write(section.getData(), 0, section.getSize());
+            }
 
-            currOffset += section.getData().length;
-
-            int size = section.getData().length;
             int relativeOffset = currOffset - offset;
             switch (sectionIdx) {
                 case VmxFile.SECTION_TEXT -> {
                     textOffset = relativeOffset;
-                    textSize = size;
+                    textSize = section.getSize();
                 }
                 case VmxFile.SECTION_RODATA -> {
                     rodataOffset = relativeOffset;
-                    rodataSize = size;
+                    rodataSize = section.getSize();
                 }
                 case VmxFile.SECTION_DATA -> {
                     dataOffset = relativeOffset;
-                    dataSize = size;
+                    dataSize = section.getSize();
                 }
                 case VmxFile.SECTION_BSS -> {
                     bssOffset = relativeOffset;
-                    bssSize = size;
+                    bssSize = section.getSize();
                 }
             }
+            currOffset += section.getSize();
         }
+
         return new SectionOffsets(textOffset, textSize,
                                   rodataOffset, rodataSize,
                                   dataOffset, dataSize,

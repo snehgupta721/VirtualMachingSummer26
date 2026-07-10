@@ -27,7 +27,7 @@ public class VmxExtensionReader {
             switch (type) {
                 // parse extension
                 case VmxExt.TYPE_RELOC:
-                    VmxExt curr = new RelocationExtReader().read(raf, type, extFlag, headerSize + offset, size);
+                    VmxExt curr = new RelocationExtReader().read(raf, type, extFlag, headerSize + offset);
                     extensions.add(curr);
                     break;
                 default:

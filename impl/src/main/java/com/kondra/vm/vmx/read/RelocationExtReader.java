@@ -15,7 +15,7 @@ public class RelocationExtReader {
     public RelocationExtReader() {
     }
 
-    public RelocationExtension read(RandomAccessFile raf, int type, int flags, int offset, int size) throws IOException {
+    public RelocationExtension read(RandomAccessFile raf, int type, int flags, int offset) throws IOException {
         Map<Integer, List<Relocation>> relocations = new HashMap<>();
         // Parse relocation extension header
         int textOffset = readInt(raf, offset + RelocationExtension.REL_OFFSET_TEXT);
@@ -28,19 +28,15 @@ public class RelocationExtReader {
         int bssSize = readInt(raf, offset + RelocationExtension.REL_OFFSET_BSS_SIZE);
 
         // Parse relocation extension content
-        relocations.put(VmxFile.SECTION_TEXT,
-                parseRelocationRecords(raf, textOffset, VmxFile.SECTION_TEXT, textSize));
-        relocations.put(VmxFile.SECTION_RODATA,
-                parseRelocationRecords(raf, rodataOffset, VmxFile.SECTION_RODATA, rodataSize));
-        relocations.put(VmxFile.SECTION_DATA,
-                parseRelocationRecords(raf, dataOffset, VmxFile.SECTION_DATA, dataSize));
-        relocations.put(VmxFile.SECTION_BSS,
-                parseRelocationRecords(raf, bssOffset, VmxFile.SECTION_BSS, bssSize));
+        relocations.put(VmxFile.SECTION_TEXT, parseRelocationRecords(raf, offset + textOffset, textSize));
+        relocations.put(VmxFile.SECTION_RODATA, parseRelocationRecords(raf, offset + rodataOffset, rodataSize));
+        relocations.put(VmxFile.SECTION_DATA, parseRelocationRecords(raf, offset + dataOffset, dataSize));
+        relocations.put(VmxFile.SECTION_BSS, parseRelocationRecords(raf, offset + bssOffset, bssSize));
 
         return new RelocationExtension(type, flags, relocations);
     }
 
-    private List<Relocation> parseRelocationRecords(RandomAccessFile raf, int offset, int section, int size) throws IOException {
+    private List<Relocation> parseRelocationRecords(RandomAccessFile raf, int offset, int size) throws IOException {
         List<Relocation> currRelocs = new ArrayList<>();
         int cursor = offset;
         while (cursor < offset + size) {
@@ -49,7 +45,6 @@ public class RelocationExtReader {
             currRelocs.add(new RelocationRecord(word1, word2));
             cursor += 8;
         }
-
         return currRelocs;
     }
 }

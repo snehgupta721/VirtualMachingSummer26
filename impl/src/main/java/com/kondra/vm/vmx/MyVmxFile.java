@@ -60,16 +60,16 @@ public class MyVmxFile implements VmxFile {
             VmxExtensionWriter extensionWriter = new VmxExtensionWriter();
             int fileSize = extensionWriter.write(raf, extensions, programSize);
 
-//            SectionWriter sectionWriter = new SectionWriter();
-//            int headerSize = VmxHeader.HEADER_SIZE + SectionHeader.HEADER_SIZE +
-//                                    (VmxExt.HEADER_SIZE * extensions.size());
-//            SectionOffsets sectionOffsets = sectionWriter.write(raf, sections, headerSize);
-//
-//            SectionHeaderWriter sectionHeaderWriter = new SectionHeaderWriter();
-//            sectionHeaderWriter.write(raf, sectionOffsets);
-//
-//            VmxHeaderWriter headerWriter = new VmxHeaderWriter();
-//            headerWriter.write(raf, header, programSize, fileSize);
+            SectionWriter sectionWriter = new SectionWriter();
+            int headerSize = VmxHeader.HEADER_SIZE + SectionHeader.HEADER_SIZE +
+                                    (VmxExt.HEADER_SIZE * extensions.size());
+            SectionOffsets sectionOffsets = sectionWriter.write(raf, sections, headerSize);
+
+            SectionHeaderWriter sectionHeaderWriter = new SectionHeaderWriter();
+            sectionHeaderWriter.write(raf, sectionOffsets);
+
+            VmxHeaderWriter headerWriter = new VmxHeaderWriter();
+            headerWriter.write(raf, header, programSize, fileSize);
         } catch (Exception e) {
             throw new VmxException("Error writing file " + file.getAbsolutePath(), e);
         }

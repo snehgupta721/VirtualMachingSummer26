@@ -11,14 +11,17 @@
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/data/Section.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/data/SectionHeader.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/data/SectionOffsets.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/data/SymbolTableExtension.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/data/VmxHeader.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/read/RelocationExtReader.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/read/SectionHeaderReader.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/read/SectionReader.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/read/SymbolTableExtReader.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/read/VmxExtensionReader.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/read/VmxHeaderReader.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/write/RelocationExtWriter.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/write/SectionHeaderWriter.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/write/SectionWriter.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/write/SymbolTableExtWriter.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/write/VmxExtensionWriter.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/write/VmxHeaderWriter.java

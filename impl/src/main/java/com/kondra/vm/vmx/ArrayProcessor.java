@@ -39,6 +39,11 @@ public class ArrayProcessor {
         return raf.readByte(); // RandomAccessFile has this built-in!
     }
 
+    public static char readChar(RandomAccessFile raf, int offset) throws IOException {
+        raf.seek(offset);
+        return (char) raf.readUnsignedByte();
+    }
+
     /**
      * Helper method to write a 4-byte int to the file in little endian format
      */
@@ -76,5 +81,16 @@ public class ArrayProcessor {
     public static void writeByte(RandomAccessFile raf, int offset, byte value) throws IOException {
         raf.seek(offset);
         raf.write(value); // RandomAccessFile only writes the lower 8 bits of the int
+    }
+
+    public static void writeString(RandomAccessFile raf, int offset, String value) throws IOException {
+        byte[] buffer = new byte[value.length()];
+        raf.seek(offset);
+        raf.write(value.getBytes());
+    }
+
+    public static void writeChar(RandomAccessFile raf, int offset, char value) throws IOException {
+        raf.seek(offset);
+        raf.write(value);
     }
 }

@@ -3,6 +3,7 @@ package com.kondra.vm.vmx.write;
 import com.kondra.vm.common.vmx.VmxExt;
 import com.kondra.vm.vmx.data.RelocationExtension;
 import com.kondra.vm.vmx.data.SectionHeader;
+import com.kondra.vm.vmx.data.SymbolTableExtension;
 import com.kondra.vm.vmx.data.VmxHeader;
 
 import java.io.IOException;
@@ -36,9 +37,20 @@ public class VmxExtensionWriter {
             writeInt(raf, extHeaderOffset + 8, size);
             switch (type) {
                 case VmxExt.TYPE_RELOC:
-                    RelocationExtWriter relocWriter = new RelocationExtWriter();
                     RelocationExtension relocExt = (RelocationExtension) extension;
-                    relocWriter.write(raf, relocExt, payloadOffset);
+                    new RelocationExtWriter().write(raf, relocExt, payloadOffset);
+                    break;
+                case VmxExt.TYPE_SYMTAB:
+                    SymbolTableExtension symbolTableExt = (SymbolTableExtension) extension;
+                    new SymbolTableExtWriter().write(raf, symbolTableExt, payloadOffset, size);
+                    break;
+                case VmxExt.TYPE_PRELOAD:
+                    break;
+                case VmxExt.TYPE_LABEL:
+                    break;
+                case VmxExt.TYPE_EXPORT:
+                    break;
+                case VmxExt.TYPE_AFFINITY:
                     break;
                 default:
                     break;

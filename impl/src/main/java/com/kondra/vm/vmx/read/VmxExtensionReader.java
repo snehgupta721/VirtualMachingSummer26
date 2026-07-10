@@ -24,15 +24,34 @@ public class VmxExtensionReader {
             int offset  = readInt(raf, cursor + 4);
             int size    = readInt(raf, cursor + 8);
 
+            int payloadOffset = headerSize + offset;
+            VmxExt curr = null;
             switch (type) {
                 // parse extension
+                case VmxExt.TYPE_LABEL:
+                    System.out.println("Label ext at " + payloadOffset);
+                    break;
                 case VmxExt.TYPE_RELOC:
-                    VmxExt curr = new RelocationExtReader().read(raf, type, extFlag, headerSize + offset);
-                    extensions.add(curr);
+                    System.out.println("Relocation ext at " + payloadOffset);
+                    curr = new RelocationExtReader().read(raf, type, extFlag, payloadOffset);
+                    break;
+                case VmxExt.TYPE_SYMTAB:
+                    System.out.println("SymTab ext at " + payloadOffset);
+                    curr = new SymbolTableExtReader().read(raf, type, extFlag, payloadOffset, size);
+                    break;
+                case VmxExt.TYPE_PRELOAD:
+                    System.out.println("Preload ext at " + payloadOffset);
+                    break;
+                case VmxExt.TYPE_EXPORT:
+                    System.out.println("Export ext at " + payloadOffset);
+                    break;
+                case VmxExt.TYPE_AFFINITY:
+                    System.out.println("Affinity ext at " + payloadOffset);
                     break;
                 default:
                     break;
             }
+            if (curr != null) extensions.add(curr);
             cursor += VmxExt.HEADER_SIZE;
         }
         return extensions;

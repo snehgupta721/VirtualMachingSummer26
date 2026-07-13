@@ -2,12 +2,14 @@ package com.kondra.vm.vmx;
 
 import com.kondra.vm.common.Version;
 import com.kondra.vm.common.vmx.VmxExt;
-import com.kondra.vm.vmx.data.LabelExtension;
+import com.kondra.vm.common.vmx.ext.Relocation;
+import com.kondra.vm.vmx.data.*;
 import org.apache.commons.cli.*;
 
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class VmxUtil {
     // Command line option keys
@@ -87,6 +89,7 @@ public class VmxUtil {
                 for (VmxExt ext : exts) {
                     System.out.println("   (" + ext.getType() + ") " + vmx.getExtensionName(ext));
                 }
+                System.out.println();
             }
             if (info) {
                 System.out.println("Version information:");
@@ -94,13 +97,7 @@ public class VmxUtil {
                 System.out.println("   version      : " + version.getMajor() + "." + version.getMinor());
                 System.out.println("   build number : " + version.getBuildNum());
 
-                LabelExtension lext = null;
-                List<VmxExt> exts = vmx.getExtensions();
-                for (VmxExt ext : exts) {
-                    if (ext.getType() == VmxExt.TYPE_LABEL) {
-                        lext = (LabelExtension) ext;
-                    }
-                }
+                LabelExtension lext = (LabelExtension) vmx.getExtension(VmxExt.TYPE_LABEL);
                 if (lext == null) {
                     System.out.println("No label extension available");
                 } else {
@@ -108,6 +105,44 @@ public class VmxUtil {
                     System.out.println("   timestamp : " + lext.getTimestamp());
                     System.out.println("   label     : " + lext.getLabel());
                 }
+                System.out.println();
+            }
+            if (preload) {
+                System.out.println("required preloads:");
+                PreloadExtension pext = (PreloadExtension) vmx.getExtension(VmxExt.TYPE_PRELOAD);
+                if (pext != null) {
+                    List<Integer> symbolOffsets = pext.getSymbolOffsets();
+                    SymbolTableExtension symTabExt = (SymbolTableExtension) vmx.getExtension(VmxExt.TYPE_SYMTAB);
+                    if (symTabExt != null) {
+                        for (Integer symbolOffset : symbolOffsets) {
+                            System.out.println("   " + symTabExt.getSymbol(symbolOffset));
+                        }
+                    }
+                }
+                System.out.println();
+            }
+            if (isImport) {
+                System.out.println("imported symbols:");
+                RelocationExtension relocExt = (RelocationExtension) vmx.getExtension(VmxExt.TYPE_RELOC);
+                if (relocExt != null) {
+                    SymbolTableExtension symTabExt = (SymbolTableExtension) vmx.getExtension(VmxExt.TYPE_SYMTAB);
+                    if (symTabExt != null) {
+                        Map<Integer, List<Relocation>> relocs = relocExt.getRelocations();
+                        for (List<Relocation> reloc : relocs.values()) {
+                            for (Relocation rel : reloc) {
+                                if (rel.isDynamic()) {
+                                    int symbolOffset = rel.getDynamicSymbolOffset();
+                                    System.out.println("   " + symTabExt.getSymbol(symbolOffset));
+                                }
+                            }
+                        }
+                    }
+                }
+                System.out.println();
+            }
+            if (export) {
+                System.out.println("exported symbols:");
+                System.out.println();
             }
 
 

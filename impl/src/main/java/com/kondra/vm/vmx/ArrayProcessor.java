@@ -2,6 +2,7 @@ package com.kondra.vm.vmx;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Date;
 
 public class ArrayProcessor {
     /**
@@ -90,6 +91,11 @@ public class ArrayProcessor {
     }
 
     public static void writeChar(RandomAccessFile raf, int offset, char value) throws IOException {
+        raf.seek(offset);
+        raf.write(value);
+    }
+
+    public static void writeArray(RandomAccessFile raf, int offset, byte[] value) throws IOException {
         raf.seek(offset);
         raf.write(value);
     }

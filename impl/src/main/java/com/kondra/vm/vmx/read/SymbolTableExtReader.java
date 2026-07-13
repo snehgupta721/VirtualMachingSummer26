@@ -10,7 +10,6 @@ import static com.kondra.vm.vmx.ArrayProcessor.readChar;
 public class SymbolTableExtReader {
 
     public SymbolTableExtension read(RandomAccessFile raf, int type, int flag, int offset, int size) throws IOException {
-        System.out.println("Read at offset " + offset + " size " + size);
         SymbolTableExtension ext = new SymbolTableExtension(type, flag);
 
         int cursor = offset;

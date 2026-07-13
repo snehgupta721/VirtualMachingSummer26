@@ -1,6 +1,8 @@
 package com.kondra.vm.vmx.read;
 
+import com.kondra.vm.common.vmx.VmxException;
 import com.kondra.vm.common.vmx.VmxExt;
+import com.kondra.vm.vmx.data.SymbolTableExtension;
 import com.kondra.vm.vmx.data.VmxHeader;
 import com.kondra.vm.vmx.data.SectionHeader;
 
@@ -29,26 +31,43 @@ public class VmxExtensionReader {
             switch (type) {
                 // parse extension
                 case VmxExt.TYPE_LABEL:
-                    System.out.println("Label ext at " + payloadOffset);
+                    System.out.println("Read Label ext at " + payloadOffset);
+                    curr = new LabelExtReader().read(raf, type, extFlag, payloadOffset, size);
                     break;
                 case VmxExt.TYPE_RELOC:
-                    System.out.println("Relocation ext at " + payloadOffset);
+                    System.out.println("Read Relocation ext at " + payloadOffset);
                     curr = new RelocationExtReader().read(raf, type, extFlag, payloadOffset);
                     break;
                 case VmxExt.TYPE_SYMTAB:
-                    System.out.println("SymTab ext at " + payloadOffset);
+                    System.out.println("Read SymTab ext at " + payloadOffset);
                     curr = new SymbolTableExtReader().read(raf, type, extFlag, payloadOffset, size);
                     break;
                 case VmxExt.TYPE_PRELOAD:
-                    System.out.println("Preload ext at " + payloadOffset);
+                    System.out.println("Read Preload ext at " + payloadOffset);
+                    curr = new PreloadExtReader().read(raf, type, extFlag, payloadOffset, size);
                     break;
                 case VmxExt.TYPE_EXPORT:
-                    System.out.println("Export ext at " + payloadOffset);
+                    System.out.println("Read Export ext at " + payloadOffset);
+                    // Assumption: Symbol table gets loaded first
+                    SymbolTableExtension symTab = null;
+                    for (VmxExt ext : extensions) {
+                        if (ext instanceof SymbolTableExtension) {
+                            symTab = (SymbolTableExtension) ext;
+                            break;
+                        }
+                    }
+
+                    if (symTab == null) {
+                        throw new VmxException("Symbol table was not loaded before export extension.");
+                    }
+                    curr = new ExportExtReader().read(raf, type, extFlag, payloadOffset, size, symTab);
                     break;
                 case VmxExt.TYPE_AFFINITY:
-                    System.out.println("Affinity ext at " + payloadOffset);
+                    System.out.println("Read Affinity ext at " + payloadOffset);
+                    curr = new AffinityExtReader().read(raf, type, extFlag, payloadOffset, size);
                     break;
                 default:
+                    System.out.println("Unknown ext type " + type + " at " + payloadOffset);
                     break;
             }
             if (curr != null) extensions.add(curr);

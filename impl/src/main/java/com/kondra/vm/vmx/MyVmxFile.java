@@ -18,8 +18,6 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.util.*;
 
-import static com.kondra.vm.vmx.ArrayProcessor.writeInt;
-
 public class MyVmxFile implements VmxFile {
     private final VmxHeader header;
     private final List<VmxExt> extensions;

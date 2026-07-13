@@ -4,14 +4,11 @@ import com.kondra.vm.common.Version;
 import com.kondra.vm.common.vmx.VmxException;
 import com.kondra.vm.common.vmx.VmxExt;
 import com.kondra.vm.common.vmx.VmxFile;
-import com.kondra.vm.vmx.data.SectionOffsets;
-import com.kondra.vm.vmx.data.VmxHeader;
+import com.kondra.vm.vmx.data.*;
 import com.kondra.vm.vmx.read.SectionHeaderReader;
 import com.kondra.vm.vmx.read.SectionReader;
 import com.kondra.vm.vmx.read.VmxExtensionReader;
 import com.kondra.vm.vmx.read.VmxHeaderReader;
-import com.kondra.vm.vmx.data.Section;
-import com.kondra.vm.vmx.data.SectionHeader;
 import com.kondra.vm.vmx.write.*;
 
 import java.io.File;
@@ -137,5 +134,30 @@ public class MyVmxFile implements VmxFile {
     @Override
     public void setEntryOffset(int entryOffset) {
         header.setEntryOffset(entryOffset);
+    }
+
+    public void setLabel(String label, Date timestamp) {
+        // find label extension
+        for (VmxExt ext : extensions) {
+            if (ext.getType() == VmxExt.TYPE_LABEL) {
+                LabelExtension labelExtension = (LabelExtension) ext;
+                labelExtension.setLabel(label);
+                labelExtension.setTimestamp(timestamp);
+            }
+        }
+    }
+
+    public String getExtensionName(VmxExt ext) {
+        int type = ext.getType();
+        return switch (type) {
+            case VmxExt.TYPE_RELOC -> "relocation tables";
+            case VmxExt.TYPE_SYMTAB -> "symbol table";
+            case VmxExt.TYPE_PRELOAD -> "preload images";
+            case VmxExt.TYPE_EXPORT -> "exported symbols";
+            case VmxExt.TYPE_DEBUG -> "debug";
+            case VmxExt.TYPE_LABEL -> "label information";
+            case VmxExt.TYPE_AFFINITY -> "affinity table";
+            default -> "unknown";
+        };
     }
 }

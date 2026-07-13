@@ -31,23 +31,18 @@ public class VmxExtensionReader {
             switch (type) {
                 // parse extension
                 case VmxExt.TYPE_LABEL:
-                    System.out.println("Read Label ext at " + payloadOffset);
                     curr = new LabelExtReader().read(raf, type, extFlag, payloadOffset, size);
                     break;
                 case VmxExt.TYPE_RELOC:
-                    System.out.println("Read Relocation ext at " + payloadOffset);
                     curr = new RelocationExtReader().read(raf, type, extFlag, payloadOffset);
                     break;
                 case VmxExt.TYPE_SYMTAB:
-                    System.out.println("Read SymTab ext at " + payloadOffset);
                     curr = new SymbolTableExtReader().read(raf, type, extFlag, payloadOffset, size);
                     break;
                 case VmxExt.TYPE_PRELOAD:
-                    System.out.println("Read Preload ext at " + payloadOffset);
                     curr = new PreloadExtReader().read(raf, type, extFlag, payloadOffset, size);
                     break;
                 case VmxExt.TYPE_EXPORT:
-                    System.out.println("Read Export ext at " + payloadOffset);
                     // Assumption: Symbol table gets loaded first
                     SymbolTableExtension symTab = null;
                     for (VmxExt ext : extensions) {
@@ -63,11 +58,9 @@ public class VmxExtensionReader {
                     curr = new ExportExtReader().read(raf, type, extFlag, payloadOffset, size, symTab);
                     break;
                 case VmxExt.TYPE_AFFINITY:
-                    System.out.println("Read Affinity ext at " + payloadOffset);
                     curr = new AffinityExtReader().read(raf, type, extFlag, payloadOffset, size);
                     break;
                 default:
-                    System.out.println("Unknown ext type " + type + " at " + payloadOffset);
                     break;
             }
             if (curr != null) extensions.add(curr);

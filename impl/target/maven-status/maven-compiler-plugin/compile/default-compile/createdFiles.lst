@@ -38,4 +38,5 @@ com/kondra/vm/MyVirtualMachine.class
 com/kondra/vm/vmx/write/SymbolTableExtWriter.class
 com/kondra/vm/vmx/MyVmxFile.class
 com/kondra/vm/vmx/read/SymbolTableExtReader.class
+com/kondra/vm/vmx/VmxUtil.class
 com/kondra/vm/vmx/write/VmxHeaderWriter.class

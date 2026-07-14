@@ -1,15 +1,10 @@
 package com.kondra.vm.vmx;
 
-import com.kondra.vm.common.Version;
-import com.kondra.vm.common.vmx.VmxExt;
-import com.kondra.vm.common.vmx.ext.Relocation;
 import com.kondra.vm.vmx.data.*;
 import org.apache.commons.cli.*;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class VmxUtil {
     // Command line option keys
@@ -63,89 +58,42 @@ public class VmxUtil {
             String vmxFile = "";
             List<String> remainingArgs = cmd.getArgList();
             vmxFile = remainingArgs.get(0);
+            File file = new File(vmxFile);
 
-
-            MyVmxFile vmx = new MyVmxFile(new File(vmxFile));
+            Integer major = null;
+            Integer minor = null;
+            Integer buildNum = null;
+            VmxService service = new VmxService();
             if (vers != null) {
-                String[] versions = vers.split(",");
-                int major = Integer.parseInt(versions[0]);
-                int minor = Integer.parseInt(versions[1]);
-                Version version = new Version(major, minor, vmx.getVersion().getBuildNum());
-                vmx.setVersion(version);
+                String[] versions = vers.split("\\.");
+                major = Integer.parseInt(versions[0]);
+                minor = Integer.parseInt(versions[1]);
             }
             if (build != null) {
-                int buildNum = Integer.parseInt(build);
-                Version version = new Version(vmx.getVersion().getMajor(), vmx.getVersion().getMinor(), buildNum);
-                vmx.setVersion(version);
+                buildNum = Integer.parseInt(build);
             }
-            if (label != null) {
-                vmx.setLabel(label, new Date());
-            }
+            MyVmxFile vmx = service.getVmxFile(file, major, minor, buildNum, label);
 
             if (details) {
-                System.out.println("Detailed information:");
-                List<VmxExt> exts = vmx.getExtensions();
-                System.out.println("extensions : " + exts.size());
-                for (VmxExt ext : exts) {
-                    System.out.println("   (" + ext.getType() + ") " + vmx.getExtensionName(ext));
-                }
-                System.out.println();
+                service.printDetails(vmx);
             }
             if (info) {
-                System.out.println("Version information:");
-                Version version = vmx.getVersion();
-                System.out.println("   version      : " + version.getMajor() + "." + version.getMinor());
-                System.out.println("   build number : " + version.getBuildNum());
-
-                LabelExtension lext = (LabelExtension) vmx.getExtension(VmxExt.TYPE_LABEL);
-                if (lext == null) {
-                    System.out.println("No label extension available");
-                } else {
-                    System.out.println("Label extension:");
-                    System.out.println("   timestamp : " + lext.getTimestamp());
-                    System.out.println("   label     : " + lext.getLabel());
-                }
-                System.out.println();
+                service.printInfo(vmx);
             }
             if (preload) {
-                System.out.println("required preloads:");
-                PreloadExtension pext = (PreloadExtension) vmx.getExtension(VmxExt.TYPE_PRELOAD);
-                if (pext != null) {
-                    List<Integer> symbolOffsets = pext.getSymbolOffsets();
-                    SymbolTableExtension symTabExt = (SymbolTableExtension) vmx.getExtension(VmxExt.TYPE_SYMTAB);
-                    if (symTabExt != null) {
-                        for (Integer symbolOffset : symbolOffsets) {
-                            System.out.println("   " + symTabExt.getSymbol(symbolOffset));
-                        }
-                    }
-                }
-                System.out.println();
+                service.printPreloads(vmx);
             }
             if (isImport) {
-                System.out.println("imported symbols:");
-                RelocationExtension relocExt = (RelocationExtension) vmx.getExtension(VmxExt.TYPE_RELOC);
-                if (relocExt != null) {
-                    SymbolTableExtension symTabExt = (SymbolTableExtension) vmx.getExtension(VmxExt.TYPE_SYMTAB);
-                    if (symTabExt != null) {
-                        Map<Integer, List<Relocation>> relocs = relocExt.getRelocations();
-                        for (List<Relocation> reloc : relocs.values()) {
-                            for (Relocation rel : reloc) {
-                                if (rel.isDynamic()) {
-                                    int symbolOffset = rel.getDynamicSymbolOffset();
-                                    System.out.println("   " + symTabExt.getSymbol(symbolOffset));
-                                }
-                            }
-                        }
-                    }
-                }
-                System.out.println();
+                service.printImports(vmx);
             }
             if (export) {
-                System.out.println("exported symbols:");
-                System.out.println();
+                service.printExports(vmx);
             }
-
-
+            if (output != null) {
+                vmx.write(new File(output));
+            } else {
+                vmx.write(file);
+            }
         } catch (ParseException e) {
             System.err.println(e.getMessage());
         }

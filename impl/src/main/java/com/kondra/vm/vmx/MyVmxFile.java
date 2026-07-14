@@ -160,4 +160,34 @@ public class MyVmxFile implements VmxFile {
             default -> "unknown";
         };
     }
+
+    public List<String> getPreloadSymbols() {
+        PreloadExtension pext = (PreloadExtension) getExtension(VmxExt.TYPE_PRELOAD);
+        return resolveSymbolsFromOffsets(pext != null ? pext.getSymbolOffsets() : null);
+    }
+
+    public List<String> getImportedSymbols() {
+        RelocationExtension relocExt = (RelocationExtension) getExtension(VmxExt.TYPE_RELOC);
+        return resolveSymbolsFromOffsets(relocExt != null ? new ArrayList<>(relocExt.getDynamicSymbolOffsets()) : null);
+    }
+
+    public List<String> getExportedSymbols() {
+        ExportExtension exportExt = (ExportExtension) getExtension(VmxExt.TYPE_EXPORT);
+        return exportExt.getExportedSymbols();
+    }
+
+    private List<String> resolveSymbolsFromOffsets(List<Integer> offsets) {
+        List<String> symbols = new ArrayList<>();
+        if (offsets == null || offsets.isEmpty()) {
+            return symbols;
+        }
+
+        SymbolTableExtension symTab = (SymbolTableExtension) getExtension(VmxExt.TYPE_SYMTAB);
+        if (symTab != null) {
+            for (Integer offset : offsets) {
+                symbols.add(symTab.getSymbol(offset));
+            }
+        }
+        return symbols;
+    }
 }

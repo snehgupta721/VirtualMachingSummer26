@@ -23,7 +23,6 @@ public class ExportExtension implements ExportExt {
         Export export = new ExportRecord(symbolOffset, word2);
         // Exports are sorted in the data
         exports.add(export);
-        // What if more added later? TODO sort when add
     }
 
     public Export findExport(String targetSymbol) {
@@ -66,5 +65,13 @@ public class ExportExtension implements ExportExt {
     @Override
     public int getSize() {
         return 8 * exports.size();
+    }
+
+    public List<String> getExportedSymbols() {
+        List<String> names = new ArrayList<>();
+        for (Export exp : exports) {
+            names.add(symTab.getSymbol(exp.getSymbolOffset()));
+        }
+        return names;
     }
 }

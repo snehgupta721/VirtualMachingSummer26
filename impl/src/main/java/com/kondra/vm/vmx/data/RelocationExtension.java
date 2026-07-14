@@ -3,8 +3,10 @@ package com.kondra.vm.vmx.data;
 import com.kondra.vm.common.vmx.ext.Relocation;
 import com.kondra.vm.common.vmx.ext.RelocationExt;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Purpose: Guides on how to get the four sections of data
@@ -56,5 +58,17 @@ public class RelocationExtension implements RelocationExt {
 
     public Map<Integer, List<Relocation>> getRelocations() {
         return relocations;
+    }
+
+    public Set<Integer> getDynamicSymbolOffsets() {
+        Set<Integer> offsets = new LinkedHashSet<>(); // Keeps order, prevents duplicates
+        for (List<Relocation> sectionRelocs : this.relocations.values()) {
+            for (Relocation rel : sectionRelocs) {
+                if (rel.isDynamic()) {
+                    offsets.add(rel.getDynamicSymbolOffset());
+                }
+            }
+        }
+        return offsets;
     }
 }

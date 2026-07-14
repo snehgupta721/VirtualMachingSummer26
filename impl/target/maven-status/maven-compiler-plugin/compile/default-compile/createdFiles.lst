@@ -27,6 +27,7 @@ com/kondra/vm/vmx/data/LabelExtension.class
 com/kondra/vm/vmx/write/VmxExtensionWriter.class
 com/kondra/vm/vmx/data/Section.class
 com/kondra/vm/vmx/data/SectionOffsets.class
+com/kondra/vm/vmx/VmxService.class
 com/kondra/vm/MipsCPU.class
 com/kondra/vm/vmx/write/RelocationExtWriter.class
 com/kondra/vm/vmx/data/ExportExtension.class

@@ -6,6 +6,7 @@
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/mmu/MemoryBlocks.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/ArrayProcessor.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/MyVmxFile.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/VmxService.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/VmxUtil.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/data/AffinityExtension.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/vmx/data/AffinityRecord.java

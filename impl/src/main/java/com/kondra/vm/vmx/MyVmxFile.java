@@ -173,6 +173,7 @@ public class MyVmxFile implements VmxFile {
 
     public List<String> getExportedSymbols() {
         ExportExtension exportExt = (ExportExtension) getExtension(VmxExt.TYPE_EXPORT);
+        if (exportExt == null) return Collections.emptyList();
         return exportExt.getExportedSymbols();
     }
 

@@ -1,4 +1,4 @@
-package com.kondra.vm.mmu;
+package com.kondra.vm.mmu.data;
 
 /**
  * A single block of memory

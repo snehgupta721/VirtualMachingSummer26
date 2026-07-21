@@ -12,10 +12,21 @@ import com.kondra.vm.common.memory.Memory;
 import com.kondra.vm.common.memory.MemoryMgr;
 import com.kondra.vm.common.vmx.VmxException;
 import com.kondra.vm.common.vmx.VmxFile;
+import com.kondra.vm.loader.MyLoader;
+import com.kondra.vm.mmu.MemoryAccess;
+import com.kondra.vm.mmu.MipsCPU;
+import com.kondra.vm.mmu.MyMemoryManager;
 import com.kondra.vm.vmx.MyVmxFile;
 
 public class MyVirtualMachine implements VirtualMachine {
     private Memory systemMemory;
+    private final Loader loader;
+    private final MemoryMgr memoryMgr;
+
+    public MyVirtualMachine() {
+        memoryMgr = new MyMemoryManager();
+        loader = new MyLoader(memoryMgr);
+    }
 
     @Override
     public CPU createCPU(VmThread thread) {
@@ -26,6 +37,7 @@ public class MyVirtualMachine implements VirtualMachine {
     @Override
     public void setSystemMemory(Memory memory) {
         this.systemMemory = memory;
+        memoryMgr.setMemory(memory);
     }
 
     @Override
@@ -40,7 +52,7 @@ public class MyVirtualMachine implements VirtualMachine {
 
     @Override
     public MemoryMgr getMemoryMgr() {
-        return new MyMemoryManager();
+        return memoryMgr;
     }
 
     @Override
@@ -55,7 +67,7 @@ public class MyVirtualMachine implements VirtualMachine {
 
     @Override
     public Loader getLoader() {
-        return null;
+        return loader;
     }
 
     @Override

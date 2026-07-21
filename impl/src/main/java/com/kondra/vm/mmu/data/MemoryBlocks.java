@@ -1,9 +1,8 @@
-package com.kondra.vm.mmu;
+package com.kondra.vm.mmu.data;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Collection of blocks

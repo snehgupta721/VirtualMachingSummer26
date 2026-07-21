@@ -1,4 +1,4 @@
-package com.kondra.vm;
+package com.kondra.vm.mmu;
 
 import com.kondra.vm.common.memory.Memory;
 import lombok.Getter;

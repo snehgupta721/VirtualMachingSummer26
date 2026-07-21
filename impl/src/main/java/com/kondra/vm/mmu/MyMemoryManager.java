@@ -1,10 +1,10 @@
-package com.kondra.vm;
+package com.kondra.vm.mmu;
 
 import com.kondra.vm.common.memory.InsufficientMemoryException;
 import com.kondra.vm.common.memory.Memory;
 import com.kondra.vm.common.memory.MemoryMgr;
-import com.kondra.vm.mmu.Block;
-import com.kondra.vm.mmu.MemoryBlocks;
+import com.kondra.vm.mmu.data.Block;
+import com.kondra.vm.mmu.data.MemoryBlocks;
 
 public class MyMemoryManager implements MemoryMgr {
     private Memory memory;

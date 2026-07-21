@@ -85,7 +85,6 @@ public class ArrayProcessor {
     }
 
     public static void writeString(RandomAccessFile raf, int offset, String value) throws IOException {
-        byte[] buffer = new byte[value.length()];
         raf.seek(offset);
         raf.write(value.getBytes());
     }

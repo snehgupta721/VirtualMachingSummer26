@@ -3,6 +3,7 @@
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/loader/MyLoader.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/loader/MyVmxFinder.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/loader/data/Section.java
+/Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/loader/process/Relocations.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/mmu/MemoryAccess.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/mmu/MipsCPU.java
 /Users/snehgupta/Documents/kondra-code/VirtualMachingSummer26/impl/src/main/java/com/kondra/vm/mmu/MyMemoryManager.java

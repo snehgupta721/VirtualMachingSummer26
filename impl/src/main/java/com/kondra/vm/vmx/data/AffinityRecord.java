@@ -16,31 +16,31 @@ public class AffinityRecord implements Affinity {
 
     @Override
     public int getMajorVersion() {
-        return 0;
+        return major;
     }
 
     @Override
     public void setMajorVersion(int major) {
-
+        this.major = major;
     }
 
     @Override
     public int getMinorVersion() {
-        return 0;
+        return minor;
     }
 
     @Override
     public void setMinorVersion(int minor) {
-
+        this.minor = minor;
     }
 
     @Override
     public int getSymbolOffset() {
-        return 0;
+        return symbolOffset;
     }
 
     @Override
     public void setSymbolOffset(int offset) {
-
+        this.symbolOffset = offset;
     }
 }

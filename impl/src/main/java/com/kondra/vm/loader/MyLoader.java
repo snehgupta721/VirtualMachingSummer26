@@ -4,10 +4,14 @@ import com.kondra.vm.common.loader.Image;
 import com.kondra.vm.common.loader.ImageLoadException;
 import com.kondra.vm.common.loader.Loader;
 import com.kondra.vm.common.loader.VmxFinder;
+import com.kondra.vm.common.memory.Memory;
 import com.kondra.vm.common.memory.MemoryMgr;
 import com.kondra.vm.common.vmx.VmxException;
+import com.kondra.vm.common.vmx.VmxExt;
 import com.kondra.vm.common.vmx.VmxFile;
+import com.kondra.vm.loader.process.Relocations;
 import com.kondra.vm.vmx.MyVmxFile;
+import com.kondra.vm.vmx.data.RelocationExtension;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -74,6 +78,13 @@ public class MyLoader implements Loader {
         MyImage image = new MyImage(name, vmxFile.getVersion(), file);
         image.lock();
 
+        // preloads
+        preloadNames = vmxFile.getPreloadSymbols();
+        for (String preloadName : preloadNames) {
+            Image preload = loadLibrary(preloadName);
+            image.setPreload(preload);
+        }
+
         // Load sections
         for (int sectionIdx : sectionsOrder) {
             byte[] sectionData = vmxFile.getSection(sectionIdx);
@@ -82,19 +93,18 @@ public class MyLoader implements Loader {
             image.setSection(sectionIdx, address, sectionData.length);
         }
 
+        Relocations relocations = new Relocations();
+        relocations.applyRelocations(image, vmxFile, memoryMgr.getMemory());
+
+        int textBase = image.getSectionAddress(VmxFile.SECTION_TEXT);
+        image.setEntry(textBase + vmxFile.getEntryOffset());
+
         // Exports
         exportSymbols = vmxFile.getExportedSymbols();
         for (String symbol : exportSymbols) {
             int address = memoryMgr.allocate(symbol.length());
             // assign data to this block of adddress?
             image.setSymbolAddress(symbol, address);
-        }
-
-        // preloads
-        preloadNames = vmxFile.getPreloadSymbols();
-        for (String preloadName : preloadNames) {
-            Image preload = loadLibrary(preloadName);
-            image.setPreload(preload);
         }
 
         return image;
@@ -113,7 +123,9 @@ public class MyLoader implements Loader {
     public void unloadImage(Image image) {
         if (image == null) return;
         image.unlock();
+        if (image.getUseCount() > 0) return;
 
+        images.remove(image);
         // free all section data related to this image
         for (int sectionIdx : sectionsOrder) {
             memoryMgr.free(image.getSectionAddress(sectionIdx));
@@ -124,6 +136,10 @@ public class MyLoader implements Loader {
             memoryMgr.free(image.getSymbolAddress(symbol));
         }
 
+        List<Image> preloads = image.getPreloads();
+        for (Image preload : preloads) {
+            unloadImage(preload);
+        }
         // free all preloads related to this image
         for (String preload : preloadNames) {
             memoryMgr.free(image.getSymbolAddress(preload));

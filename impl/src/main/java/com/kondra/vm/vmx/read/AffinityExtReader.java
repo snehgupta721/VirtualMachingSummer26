@@ -18,6 +18,7 @@ public class AffinityExtReader {
             int major = readShort(raf, cursor);
             int minor = readShort(raf, cursor + 2);
             int symbolOffset = readInt(raf, cursor + 4);
+            ext.addAffinityRecord(new AffinityRecord(major, minor, symbolOffset));
             cursor += AffinityRecord.SIZE;
         }
         return ext;

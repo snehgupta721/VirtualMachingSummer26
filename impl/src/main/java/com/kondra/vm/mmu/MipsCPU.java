@@ -4,6 +4,7 @@ import com.kondra.vm.common.CPU;
 import com.kondra.vm.common.StackOverflowException;
 import com.kondra.vm.common.concurrent.VmThread;
 import com.kondra.vm.common.memory.Memory;
+import com.kondra.vm.common.napi.ExitCPUException;
 
 public class MipsCPU implements CPU {
     private final Memory systemMemory;
@@ -13,6 +14,8 @@ public class MipsCPU implements CPU {
     private int nextPtr;
     private int hi;
     private int lo;
+    private boolean done;
+    private int baseStackAddr;
 
     public MipsCPU(VmThread thread, Memory systemMemory) {
         this.thread = thread;
@@ -22,6 +25,11 @@ public class MipsCPU implements CPU {
         nextPtr = iPtr + 4;
         hi = 0;
         lo = 0;
+        done = false;
+        this.baseStackAddr = 0;
+        if (thread != null) {
+            this.baseStackAddr = thread.getStackAddr();
+        }
     }
 
     @Override
@@ -76,21 +84,40 @@ public class MipsCPU implements CPU {
     @Override
     public void execute(int i) throws StackOverflowException {
         for (int j = 0; j < i; j++) {
-            int instruction = systemMemory.getInt(iPtr);
-            iPtr = nextPtr;
-            nextPtr += 4;
-            decode(instruction);
+            if (done) return;
+            step();
         }
     }
 
     @Override
     public void execute() throws StackOverflowException {
+        while (!done) {
+            step();
+        }
+    }
 
+    private void step() throws StackOverflowException {
+        int currentAddr = iPtr;
+        // advance pointers
+        iPtr = nextPtr;
+        nextPtr = iPtr + 4;
+
+        int instruction = 0;
+        try {
+            instruction = systemMemory.getInt(currentAddr);
+        } catch (Exception e) {
+            done = true;
+            return;
+        }
+        decode(instruction);
+
+        // zero address always set to 0
+        registers[CPU.REG_ZERO] = 0;
     }
 
     @Override
     public boolean isDone() {
-        return false;
+        return done;
     }
 
     @Override
@@ -99,22 +126,31 @@ public class MipsCPU implements CPU {
     }
 
     private void decode(int instruction) {
-        short opcode = (short) ((instruction >>> 26) & 0x3F);  // Bits 31-26
-        switch (opcode) {
-            case 0x00:
-                // R type
-                rType(instruction);
-                break;
-            case 0x01:
-                // J type: jump
-                jType(instruction);
-                break;
+        switch (instruction) {
+            case 0x0000000b:
+                // halt;
+                return;
+            case 0x0000000c:
+                // exit
+                done = true;
+                throw new ExitCPUException();
             default:
-                // I type
-                iType(instruction);
-                break;
+                short opcode = (short) ((instruction >>> 26) & 0x3F);  // Bits 31-26
+                switch (opcode) {
+                    case 0x00:
+                        // R type
+                        rType(instruction);
+                        break;
+                    case 0x01:
+                        // J type: jump
+                        jType(instruction);
+                        break;
+                    default:
+                        // I type
+                        iType(instruction);
+                        break;
+                }
         }
-        registers[CPU.REG_ZERO] = 0;
     }
 
     private void iType(int instruction) {
@@ -139,17 +175,27 @@ public class MipsCPU implements CPU {
                 // addiu
                 registers[rt] = registers[rs] + immediate;
                 break;
+            case 0x12:
+                // addiu modified
+                registers[rt] = registers[rs] + immediate;
+                // if register being changes is the SP register, check for stack overflow
+                if (rt == CPU.REG_SP) {
+                    if (registers[rt] <= baseStackAddr) {
+                        throw new StackOverflowException();
+                    }
+                }
+                break;
             case 0x0c:
                 // andi
-                registers[rt] = registers[rs] & immediate;
+                registers[rt] = registers[rs] & (instruction & 0xFFFF);
                 break;
             case 0xd:
                 // ori
-                registers[rt] = registers[rs] | immediate;
+                registers[rt] = registers[rs] | (instruction & 0xFFFF);
                 break;
             case 0xe:
                 // xori
-                registers[rt] = registers[rs] ^ immediate;
+                registers[rt] = registers[rs] ^ (instruction & 0xFFFF);
                 break;
             case 0xf:
                 // lui
@@ -268,32 +314,24 @@ public class MipsCPU implements CPU {
                 // beq
                 if (registers[rs] == registers[rt]) {
                     nextPtr = iPtr + (int) (offset << 2);
-                } else {
-                    nextPtr = iPtr + 4;
                 }
                 break;
             case 5:
                 // bne
                 if (registers[rs] != registers[rt]) {
                     nextPtr = iPtr + (int) (offset << 2);
-                } else {
-                    nextPtr = iPtr + 4;
                 }
                 break;
             case 6:
                 // blez
                 if (registers[rs] <= 0) {
                     nextPtr = iPtr + (int) (offset << 2);
-                } else {
-                    nextPtr = iPtr + 4;
                 }
                 break;
             case 7:
                 // bgtz
                 if (registers[rs] > 0) {
                     nextPtr = iPtr + (int) (offset << 2);
-                } else {
-                    nextPtr = iPtr + 4;
                 }
                 break;
             case 20:
@@ -317,16 +355,12 @@ public class MipsCPU implements CPU {
                 // bltz
                 if (registers[rs] < 0) {
                     nextPtr = iPtr + (int) (offset << 2);
-                } else {
-                    nextPtr = iPtr + 4;
                 }
                 break;
             case 1:
                 // bgez
                 if (registers[rs] >= 0) {
                     nextPtr = iPtr + (int) (offset << 2);
-                } else {
-                    nextPtr = iPtr + 4;
                 }
                 break;
             case 16:
@@ -334,8 +368,6 @@ public class MipsCPU implements CPU {
                 registers[CPU.REG_RA] = nextPtr;
                 if (registers[rs] < 0) {
                     nextPtr = iPtr + (int) (offset << 2);
-                } else {
-                    nextPtr = iPtr + 4;
                 }
                 break;
             case 17:
@@ -343,8 +375,6 @@ public class MipsCPU implements CPU {
                 registers[CPU.REG_RA] = nextPtr;
                 if (registers[rs] >= 0) {
                     nextPtr = iPtr + (int) (offset << 2);
-                } else {
-                    nextPtr = iPtr + 4;
                 }
                 break;
         }

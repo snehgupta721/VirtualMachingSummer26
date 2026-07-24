@@ -23,7 +23,7 @@ public class AffinityExtension implements AffinityExt {
 
     @Override
     public List<Affinity> getAffinityList() {
-        return List.of();
+        return affinityRecords;
     }
 
     @Override

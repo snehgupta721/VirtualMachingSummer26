@@ -62,6 +62,10 @@ public class MyImage implements Image {
         // unload image if useCount == 0
     }
 
+    public void setEntry(int entry) {
+        this.entry = entry;
+    }
+
     @Override
     public int getEntry() {
         return entry;
@@ -69,7 +73,17 @@ public class MyImage implements Image {
 
     @Override
     public int getSymbolAddress(String symbol) {
-        return symbols.getOrDefault(symbol, 0);
+        return symbols.getOrDefault(symbol, -1);
+    }
+
+    public int resolveSymbolAddress(String symbol) {
+        for (Image preload : preloads) {
+            int address = preload.getSymbolAddress(symbol);
+            if (address != -1) {
+                return address;
+            }
+        }
+        return symbols.getOrDefault(symbol, -1);
     }
 
     public void setSymbolAddress(String symbol, int address) {
@@ -97,9 +111,5 @@ public class MyImage implements Image {
 
     public void setPreload(Image image) {
         preloads.add(image);
-    }
-
-    public void cleanUp() {
-        // free memory
     }
 }

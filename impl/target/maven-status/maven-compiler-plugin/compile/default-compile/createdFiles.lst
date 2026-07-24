@@ -25,6 +25,7 @@ com/kondra/vm/vmx/read/SectionReader.class
 com/kondra/vm/mmu/data/MemoryBlocks.class
 com/kondra/vm/vmx/read/VmxHeaderReader.class
 com/kondra/vm/vmx/read/LabelExtReader.class
+com/kondra/vm/loader/process/Relocations.class
 com/kondra/vm/loader/MyLoader.class
 com/kondra/vm/vmx/data/LabelExtension.class
 com/kondra/vm/vmx/write/VmxExtensionWriter.class
